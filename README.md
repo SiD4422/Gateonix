@@ -7,7 +7,7 @@ A fully interactive, browser-based digital logic gate simulator built with vanil
 ## 🚀 Live Demo
 
 > Open `index.html` in any modern browser to get started.  
-> *(GitHub Pages link — add yours here once deployed)*
+> *(gateonix-eee.netlify.app)*
 
 ---
 

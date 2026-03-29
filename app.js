@@ -750,6 +750,10 @@ resize();
     } catch(e) { /* fall through */ }
   }
 
+  // © 2026 Siddharth Kumar — Gateonix
+// Unauthorized use or reproduction is prohibited.
+// github.com/SiD4422/gateonix
+
   simulate(); render();
   renderUserTemplates();
   renderCircuitTruthTable();

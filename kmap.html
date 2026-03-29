@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gateonix — K-Map Solver</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#080a0e; --panel:#0f1218; --surface:#161b24; --raised:#1e2535;
+      --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.13);
+      --accent:#00d4aa; --accent2:#00ffcc;
+      --text:#e2e8f0; --muted:#64748b;
+      --font-ui:'Syne',sans-serif; --font-mono:'JetBrains Mono',monospace;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:var(--font-ui);min-height:100vh;overflow-x:hidden}
+    .orb{position:fixed;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:0;animation:orb-drift 14s ease-in-out infinite alternate}
+    .orb1{width:500px;height:500px;background:rgba(0,212,170,0.07);top:-180px;right:-140px}
+    .orb2{width:380px;height:380px;background:rgba(64,196,255,0.05);bottom:-100px;left:-100px;animation-delay:-7s}
+    @keyframes orb-drift{from{transform:translate(0,0)}to{transform:translate(30px,20px)}}
+    nav{position:fixed;top:0;left:0;right:0;z-index:100;height:56px;background:rgba(8,10,14,0.88);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 32px;gap:20px}
+    .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+    .nav-logo-icon{font-size:22px;color:var(--accent);animation:pulse 2.5s ease-in-out infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.6}}
+    .nav-logo-name{font-family:var(--font-ui);font-weight:800;font-size:18px;letter-spacing:-0.02em;color:var(--text)}
+    .nav-links{display:flex;gap:4px;margin-left:auto}
+    .nav-link{font-family:var(--font-mono);font-size:11px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border-radius:6px;transition:all .15s;letter-spacing:.04em}
+    .nav-link:hover{color:var(--text);background:var(--surface)}
+    .nav-link.active{color:var(--accent);background:rgba(0,212,170,0.08)}
+    .nav-cta{font-family:var(--font-mono);font-size:11px;font-weight:700;color:#050e0b;background:var(--accent);border:none;padding:7px 16px;border-radius:6px;text-decoration:none;transition:all .15s;letter-spacing:.04em}
+    .nav-cta:hover{background:var(--accent2);transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,212,170,0.28)}
+    main{position:relative;z-index:1;padding:80px 24px 60px;max-width:1200px;margin:0 auto}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .page-header{text-align:center;margin-bottom:36px;animation:fadeUp .5s ease both}
+    .page-badge{display:inline-flex;align-items:center;gap:7px;font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);background:rgba(0,212,170,0.07);border:1px solid rgba(0,212,170,0.18);padding:5px 14px;border-radius:40px;margin-bottom:16px}
+    .page-badge::before{content:'';width:5px;height:5px;background:var(--accent);border-radius:50%;box-shadow:0 0 8px var(--accent)}
+    .page-title{font-family:var(--font-ui);font-weight:800;font-size:clamp(24px,4vw,42px);letter-spacing:-.03em;color:var(--text);margin-bottom:8px}
+    .page-title span{color:var(--accent)}
+    .page-sub{font-family:var(--font-mono);font-size:12px;color:var(--muted)}
+    .controls-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--border2);border-radius:14px;padding:13px 18px;margin-bottom:18px}
+    .ctrl-label{font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+    .var-btn,.mode-btn{font-family:var(--font-mono);font-size:11px;font-weight:600;color:var(--muted);background:var(--surface);border:1px solid var(--border2);border-radius:7px;padding:6px 13px;cursor:pointer;transition:all .15s;white-space:nowrap}
+    .var-btn:hover,.mode-btn:hover{color:var(--text);border-color:rgba(255,255,255,0.22)}
+    .var-btn.active{color:var(--accent);background:rgba(0,212,170,0.1);border-color:rgba(0,212,170,0.35)}
+    .mode-btn.active{color:#050e0b;background:var(--accent);border-color:var(--accent)}
+    .ctrl-sep{width:1px;height:26px;background:var(--border2);flex-shrink:0}
+    .ctrl-right{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+    .action-btn{font-family:var(--font-mono);font-size:11px;font-weight:700;border-radius:8px;padding:7px 16px;cursor:pointer;transition:all .15s;border:1px solid var(--border2);white-space:nowrap}
+    .action-btn.solve{color:#050e0b;background:var(--accent);border-color:var(--accent)}
+    .action-btn.solve:hover{background:var(--accent2);box-shadow:0 4px 16px rgba(0,212,170,0.3)}
+    .action-btn.export-btn{color:var(--accent);background:rgba(0,212,170,0.08);border-color:rgba(0,212,170,0.3)}
+    .action-btn.export-btn:hover{background:rgba(0,212,170,0.15);box-shadow:0 4px 14px rgba(0,212,170,0.2)}
+    .action-btn.clear{color:var(--muted);background:transparent}
+    .action-btn.clear:hover{color:var(--text);background:var(--surface)}
+    .var-name-input{width:36px;height:30px;text-align:center;background:var(--surface);border:1px solid var(--border2);border-radius:6px;color:var(--accent);font-family:var(--font-mono);font-size:12px;font-weight:700;outline:none;transition:border-color .15s}
+    .var-name-input:focus{border-color:var(--accent)}
+    .hint-bar{background:rgba(0,212,170,0.04);border:1px solid rgba(0,212,170,0.12);border-radius:10px;padding:10px 16px;font-family:var(--font-mono);font-size:11px;color:var(--muted);display:flex;align-items:center;gap:8px;margin-bottom:22px;flex-wrap:wrap}
+    .hint-bar strong{color:var(--accent)}
+    .solver-grid{display:grid;grid-template-columns:auto 1fr;gap:22px;align-items:start}
+    @media(max-width:820px){.solver-grid{grid-template-columns:1fr}}
+    .kmap-wrap{background:var(--panel);border:1px solid var(--border2);border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:14px}
+    .kmap-section-title{font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.14em;text-transform:uppercase}
+    .kmap-table{border-collapse:collapse;font-family:var(--font-mono)}
+    .kmap-table th{font-size:11px;font-weight:700;color:var(--accent);padding:6px 10px;text-align:center;background:rgba(0,212,170,0.06);border:1px solid var(--border2);white-space:nowrap;min-width:46px}
+    .kmap-table th.corner{background:transparent;border-color:transparent;font-size:10px;color:var(--muted)}
+    .kmap-table td{border:1px solid var(--border2);text-align:center;padding:0;width:52px;height:52px;position:relative;cursor:pointer;transition:background .12s}
+    .kmap-table td:hover{background:rgba(0,212,170,0.05)}
+    .kmap-cell{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;position:relative;z-index:2;user-select:none;transition:color .12s}
+    .kmap-cell.v0{color:#ff4444}
+    .kmap-cell.v1{color:#00e676}
+    .kmap-cell.vx{color:#ffa726}
+    .cell-mt{position:absolute;top:2px;left:4px;font-size:7px;color:var(--muted);font-weight:500}
+    .kmap-5var-label{font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.1em;padding:6px 0 2px}
+    .result-panel{display:flex;flex-direction:column;gap:14px}
+    .result-card{background:var(--panel);border:1px solid var(--border2);border-radius:14px;padding:20px}
+    .rcard-head{display:flex;align-items:center;margin-bottom:13px;gap:8px}
+    .rcard-title{font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;flex:1}
+    .expr-display{font-family:var(--font-mono);font-size:20px;font-weight:700;color:var(--accent);background:rgba(0,212,170,0.06);border:1px solid rgba(0,212,170,0.18);border-radius:10px;padding:13px 17px;min-height:52px;display:flex;align-items:center;word-break:break-all;flex-wrap:wrap;line-height:1.6}
+    .expr-display.empty{color:var(--muted);font-size:12px;font-weight:400}
+    .steps-list{display:flex;flex-direction:column;gap:7px}
+    .step-item{display:flex;gap:9px;align-items:flex-start;background:var(--surface);border-radius:8px;padding:9px 12px;font-family:var(--font-mono);font-size:11px;border-left:3px solid transparent;transition:border-color .18s;animation:fadeUp .25s ease both}
+    .step-item:hover{border-left-color:var(--accent)}
+    .step-num{color:var(--accent);font-weight:700;flex-shrink:0;min-width:18px}
+    .step-text{color:#94a3b8;line-height:1.6}
+    .step-text strong{color:var(--text)}
+    .grp-badge{display:inline-block;padding:1px 6px;border-radius:4px;font-size:9px;font-weight:700;margin-right:4px;vertical-align:middle;border:1px solid}
+    .tt-wrap{overflow-x:auto;max-height:320px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--raised) transparent}
+    .tt-table{width:100%;border-collapse:collapse;font-family:var(--font-mono);font-size:11px}
+    .tt-table th{padding:7px 10px;background:var(--surface);color:var(--accent);font-weight:700;letter-spacing:.07em;border-bottom:1px solid var(--border2);text-align:center;position:sticky;top:0;z-index:1}
+    .tt-table td{padding:6px 10px;text-align:center;border-bottom:1px solid var(--border)}
+    .tt-table tr:last-child td{border-bottom:none}
+    .tt-table tr.tt1 td:last-child{color:#00e676;font-weight:700}
+    .tt-table tr.tt0 td:last-child{color:#ff4444}
+    .tt-table tr.ttx td:last-child{color:#ffa726;font-weight:700}
+    .tt-table tr.tt-hl{background:rgba(0,212,170,0.07)}
+    .copy-btn{font-family:var(--font-mono);font-size:10px;color:var(--muted);background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:4px 10px;cursor:pointer;transition:all .15s;white-space:nowrap}
+    .copy-btn:hover{color:var(--accent);border-color:rgba(0,212,170,0.3)}
+    #legend{display:flex;flex-wrap:wrap;gap:8px}
+    .export-toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(8px);background:var(--panel);border:1px solid rgba(0,212,170,0.35);border-radius:10px;padding:12px 22px;font-family:var(--font-mono);font-size:12px;color:var(--accent);box-shadow:0 12px 40px rgba(0,0,0,.6);z-index:20000;opacity:0;transition:opacity .22s,transform .22s;pointer-events:none}
+    .export-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  </style>
+</head>
+<body>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<nav>
+  <a class="nav-logo" href="ABOUT.html">
+    <span class="nav-logo-icon">&#x2B21;</span>
+    <span class="nav-logo-name">Gateonix</span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html"    class="nav-link">Simulator</a>
+    <a href="ABOUT.html"    class="nav-link">About</a>
+    <a href="help.html"     class="nav-link">Guide</a>
+    <a href="kmap.html"     class="nav-link active">K-Map</a>
+    <a href="Devloper.html" class="nav-link">Developers</a>
+    <a href="Feedback.html" class="nav-link">Feedback</a>
+  </div>
+  <a href="login.html" class="nav-cta">Launch App &#x2192;</a>
+</nav>
+
+<main>
+  <div class="page-header">
+    <div class="page-badge">Boolean Minimization</div>
+    <h1 class="page-title">Karnaugh Map <span>Solver</span></h1>
+    <p class="page-sub">2 &ndash; 5 variables &nbsp;&middot;&nbsp; SOP &amp; POS &nbsp;&middot;&nbsp; Quine-McCluskey &nbsp;&middot;&nbsp; Export gate circuit to Simulator</p>
+  </div>
+
+  <div class="controls-bar">
+    <span class="ctrl-label">Vars</span>
+    <button class="var-btn active" data-v="2" onclick="setVars(2)">2</button>
+    <button class="var-btn"        data-v="3" onclick="setVars(3)">3</button>
+    <button class="var-btn"        data-v="4" onclick="setVars(4)">4</button>
+    <button class="var-btn"        data-v="5" onclick="setVars(5)">5 &#x25BE;</button>
+    <div class="ctrl-sep"></div>
+    <span class="ctrl-label">Mode</span>
+    <button class="mode-btn active" id="btn-sop" onclick="setMode('SOP')">SOP</button>
+    <button class="mode-btn"        id="btn-pos" onclick="setMode('POS')">POS</button>
+    <div class="ctrl-sep"></div>
+    <span class="ctrl-label">Names</span>
+    <input class="var-name-input" id="vn0" value="A" maxlength="2" oninput="onRename()">
+    <input class="var-name-input" id="vn1" value="B" maxlength="2" oninput="onRename()">
+    <input class="var-name-input" id="vn2" value="C" maxlength="2" oninput="onRename()" style="display:none">
+    <input class="var-name-input" id="vn3" value="D" maxlength="2" oninput="onRename()" style="display:none">
+    <input class="var-name-input" id="vn4" value="E" maxlength="2" oninput="onRename()" style="display:none">
+    <div class="ctrl-right">
+      <button class="action-btn clear"      onclick="clearAll()">Clear</button>
+      <button class="action-btn solve"      onclick="solve()">&#x26A1; Solve</button>
+      <button class="action-btn export-btn" onclick="exportToCanvas()">&#x2B21; Export to Canvas</button>
+    </div>
+  </div>
+
+  <div class="hint-bar">
+    <strong>&#x2192;</strong>
+    Click a cell to cycle <strong>0</strong> &#x2192; <strong>1</strong> &#x2192; <strong>X</strong> (don&#x27;t care) &#x2192; 0 &nbsp;&middot;&nbsp;
+    <strong>Solve</strong> finds minimal groups &nbsp;&middot;&nbsp;
+    <strong>Export to Canvas</strong> builds the gate circuit in the Simulator
+  </div>
+
+  <div class="solver-grid">
+    <div class="kmap-wrap">
+      <span class="kmap-section-title">Karnaugh Map</span>
+      <div id="kmap-container"></div>
+      <div id="legend"></div>
+    </div>
+    <div class="result-panel">
+      <div class="result-card">
+        <div class="rcard-head">
+          <span class="rcard-title" id="expr-label">Simplified SOP Expression</span>
+          <button class="copy-btn" onclick="copyExpr()">&#x2398; Copy</button>
+        </div>
+        <div class="expr-display empty" id="expr-display">Click &#x26A1; Solve to simplify &#x2192;</div>
+      </div>
+      <div class="result-card">
+        <div class="rcard-head"><span class="rcard-title">Step-by-step groupings</span></div>
+        <div class="steps-list" id="steps-list">
+          <div style="font-family:var(--font-mono);font-size:11px;color:var(--muted)">Groups appear here after solving&hellip;</div>
+        </div>
+      </div>
+      <div class="result-card">
+        <div class="rcard-head"><span class="rcard-title">Truth Table</span></div>
+        <div class="tt-wrap"><table class="tt-table"><thead id="tt-head"></thead><tbody id="tt-body"></tbody></table></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="export-toast" id="export-toast"></div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────────────────
+var N = 2, MODE = 'SOP', CELLS = {}, GROUPS = [];
+var GCOL = ['#00d4aa','#ffa726','#9c6bff','#40c4ff','#f87171','#34d399','#ff80ab','#b2ff59'];
+var GRAY2 = [0,1,3,2];
+var GRAY3 = [0,1,3,2,6,7,5,4];
+
+function varNames() {
+  return ['vn0','vn1','vn2','vn3','vn4'].slice(0,N).map(function(id,i){
+    var el = document.getElementById(id);
+    var v = el ? el.value.trim() : '';
+    return v || ['A','B','C','D','E'][i];
+  });
+}
+
+// ─── LAYOUT ──────────────────────────────────────────────────────────
+function layout() {
+  if(N===2) return {rowBits:[0],colBits:[1],rowCodes:[0,1],colCodes:[0,1]};
+  if(N===3) return {rowBits:[0],colBits:[1,2],rowCodes:[0,1],colCodes:GRAY2};
+  if(N===4) return {rowBits:[0,1],colBits:[2,3],rowCodes:GRAY2,colCodes:GRAY2};
+  // 5-var: rendered as two 2x8 sub-tables
+  return {rowBits:[1,2],colBits:[3,4],rowCodes:GRAY2,colCodes:GRAY3,fiveVar:true};
+}
+
+function mintermFromRC(rc, cc, L) {
+  var m = 0;
+  L.rowBits.forEach(function(b,i){ if((rc>>(L.rowBits.length-1-i))&1) m|=(1<<(N-1-b)); });
+  L.colBits.forEach(function(b,i){ if((cc>>(L.colBits.length-1-i))&1) m|=(1<<(N-1-b)); });
+  return m;
+}
+
+// ─── RENDER KMAP ─────────────────────────────────────────────────────
+function renderKmap() {
+  var L = layout();
+  var vn = varNames();
+  var container = document.getElementById('kmap-container');
+  var html = '';
+
+  if(N === 5) {
+    // Two sub-maps: A=0 (top), A=1 (bottom). A is var index 0 (MSB = bit4)
+    // Rows: BC (vars[1],vars[2]) encoded by GRAY2 (2-bit, 4 rows)
+    // Cols: DE (vars[3],vars[4]) encoded by GRAY2 (2-bit, 4 cols)
+    // Minterm = A*16 + B*8 + C*4 + D*2 + E*1
+    var rowLabel = vn[1]+vn[2];  // BC
+    var colLabel = vn[3]+vn[4];  // DE
+    html += '<div style="display:flex;flex-direction:column;gap:20px">';
+    [0,1].forEach(function(aVal){
+      html += '<div>';
+      html += '<div class="kmap-5var-label">'+vn[0]+' = '+aVal+'</div>';
+      html += '<table class="kmap-table">';
+      html += '<tr><th class="corner">'+rowLabel+'\\'+colLabel+'</th>';
+      GRAY2.forEach(function(cc){
+        html += '<th>'+cc.toString(2).padStart(2,'0')+'</th>';
+      });
+      html += '</tr>';
+      GRAY2.forEach(function(rc){
+        html += '<tr><th>'+rc.toString(2).padStart(2,'0')+'</th>';
+        GRAY2.forEach(function(cc){
+          // rc encodes BC: B=bit1, C=bit0
+          // cc encodes DE: D=bit1, E=bit0
+          var m5 = 0;
+          if(aVal)      m5 |= (1<<4); // A=bit4
+          if((rc>>1)&1) m5 |= (1<<3); // B=bit3
+          if((rc>>0)&1) m5 |= (1<<2); // C=bit2
+          if((cc>>1)&1) m5 |= (1<<1); // D=bit1
+          if((cc>>0)&1) m5 |= (1<<0); // E=bit0
+          var val = CELLS[m5]===undefined?0:CELLS[m5];
+          var ch  = val===2?'X':val;
+          var cls = val===2?'vx':val===1?'v1':'v0';
+          html+='<td onclick="toggleCell('+m5+')"><div class="kmap-cell '+cls+'" id="cv-'+m5+'">';
+          html+='<span class="cell-mt">'+m5+'</span>'+ch+'</div></td>';
+        });
+        html+='</tr>';
+      });
+      html+='</table></div>';
+    });
+    html+='</div>';
+  } else {
+    var rowLabel2 = L.rowBits.map(function(b){return vn[b];}).join('');
+    var colLabel2 = L.colBits.map(function(b){return vn[b];}).join('');
+    html+='<table class="kmap-table">';
+    html+='<tr><th class="corner">'+rowLabel2+'\\'+colLabel2+'</th>';
+    L.colCodes.forEach(function(cc){
+      html+='<th>'+cc.toString(2).padStart(L.colBits.length,'0')+'</th>';
+    });
+    html+='</tr>';
+    L.rowCodes.forEach(function(rc){
+      html+='<tr><th>'+rc.toString(2).padStart(L.rowBits.length,'0')+'</th>';
+      L.colCodes.forEach(function(cc){
+        var mt=mintermFromRC(rc,cc,L);
+        var val=CELLS[mt]===undefined?0:CELLS[mt];
+        var ch=val===2?'X':val;
+        var cls=val===2?'vx':val===1?'v1':'v0';
+        html+='<td onclick="toggleCell('+mt+')"><div class="kmap-cell '+cls+'" id="cv-'+mt+'">';
+        html+='<span class="cell-mt">'+mt+'</span>'+ch+'</div></td>';
+      });
+      html+='</tr>';
+    });
+    html+='</table>';
+  }
+
+  container.innerHTML = html;
+  renderTT();
+}
+
+// ─── CELL TOGGLE ─────────────────────────────────────────────────────
+function toggleCell(mt) {
+  CELLS[mt] = ((CELLS[mt]===undefined?0:CELLS[mt])+1)%3;
+  var v=CELLS[mt]; var ch=v===2?'X':v; var cls=v===2?'vx':v===1?'v1':'v0';
+  var cv=document.getElementById('cv-'+mt);
+  if(cv){cv.className='kmap-cell '+cls;cv.innerHTML='<span class="cell-mt">'+mt+'</span>'+ch;}
+  renderTT(); clearResults();
+}
+
+// ─── TRUTH TABLE ──────────────────────────────────────────────────────
+function renderTT() {
+  var vn=varNames(); var total=1<<N;
+  document.getElementById('tt-head').innerHTML='<tr>'+vn.map(function(n){return'<th>'+n+'</th>';}).join('')+'<th>F</th></tr>';
+  var rows='';
+  for(var m=0;m<total;m++){
+    var v=CELLS[m]===undefined?0:CELLS[m]; var fs=v===2?'X':v;
+    var cls=v===2?'ttx':v===1?'tt1':'tt0';
+    var bits='';
+    for(var b=N-1;b>=0;b--) bits+='<td>'+((m>>b)&1)+'</td>';
+    rows+='<tr class="'+cls+'" id="ttr-'+m+'">'+bits+'<td>'+fs+'</td></tr>';
+  }
+  document.getElementById('tt-body').innerHTML=rows;
+}
+
+// ─── QUINE-McCLUSKEY ─────────────────────────────────────────────────
+function hdist(a,b){var x=a^b,c=0;while(x){c+=x&1;x>>=1;}return c;}
+
+function qmc(minterms, dc) {
+  if(!minterms.length) return [];
+  var mintSet={};
+  minterms.forEach(function(m){mintSet[m]=true;});
+  var all=minterms.concat(dc);
+
+  var cur=all.map(function(m){return{terms:[m],mask:0,used:false};});
+  var primes=[];
+
+  for(var round=0;round<N;round++){
+    var nxt=[];
+    var seen={};
+    for(var i=0;i<cur.length;i++){
+      for(var j=i+1;j<cur.length;j++){
+        var a=cur[i],b=cur[j];
+        if(a.mask!==b.mask) continue;
+        var diff=a.terms[0]^b.terms[0];
+        if(hdist(diff,0)!==1) continue;
+        var merged=[]; var ms={};
+        a.terms.concat(b.terms).forEach(function(t){if(!ms[t]){ms[t]=true;merged.push(t);}});
+        merged.sort(function(x,y){return x-y;});
+        var key=merged.join(',')+':'+(a.mask|diff);
+        if(!seen[key]){seen[key]=true;nxt.push({terms:merged,mask:a.mask|diff,used:false});}
+        a.used=true; b.used=true;
+      }
+    }
+    cur.forEach(function(x){if(!x.used)primes.push(x);});
+    if(!nxt.length) break;
+    cur=nxt.map(function(x){return{terms:x.terms,mask:x.mask,used:false};});
+  }
+  cur.forEach(function(x){if(!x.used)primes.push(x);});
+
+  var uk={};
+  primes=primes.filter(function(p){
+    var k=p.terms.join(',')+'|'+p.mask;
+    if(uk[k])return false;uk[k]=true;return true;
+  });
+  primes=primes.filter(function(p){
+    return p.terms.some(function(t){return mintSet[t];});
+  });
+  primes.sort(function(a,b){
+    return b.terms.filter(function(t){return mintSet[t];}).length
+          -a.terms.filter(function(t){return mintSet[t];}).length;
+  });
+
+  var covered={}, sel=[];
+  minterms.forEach(function(m){
+    var cov=primes.filter(function(p){return p.terms.indexOf(m)>=0;});
+    if(cov.length===1&&sel.indexOf(cov[0])<0){
+      sel.push(cov[0]);
+      cov[0].terms.forEach(function(t){if(mintSet[t])covered[t]=true;});
+    }
+  });
+  var covSize=Object.keys(covered).length;
+  while(covSize<minterms.length){
+    var best=null,bestN=0;
+    primes.forEach(function(p){
+      if(sel.indexOf(p)>=0)return;
+      var nc=p.terms.filter(function(t){return mintSet[t]&&!covered[t];}).length;
+      if(nc>bestN){bestN=nc;best=p;}
+    });
+    if(!best)break;
+    sel.push(best);
+    best.terms.forEach(function(t){if(mintSet[t]){covered[t]=true;covSize++;}});
+  }
+  return sel;
+}
+
+// ─── EXPRESSION BUILDERS ──────────────────────────────────────────────
+function impToSOP(imp,vn){
+  var terms=[];
+  for(var b=N-1;b>=0;b--){
+    if(imp.mask&(1<<b))continue;
+    var vi=N-1-b;
+    var bit=(imp.terms[0]>>b)&1;
+    terms.push(bit?vn[vi]:vn[vi]+"'");
+  }
+  return terms.length?terms.join(''):'1';
+}
+function impToPOS(imp,vn){
+  var terms=[];
+  for(var b=N-1;b>=0;b--){
+    if(imp.mask&(1<<b))continue;
+    var vi=N-1-b;
+    var bit=(imp.terms[0]>>b)&1;
+    terms.push(bit?vn[vi]+"'":vn[vi]);
+  }
+  return '('+(terms.length?terms.join('+'):'0')+')';
+}
+
+// ─── SOLVE ────────────────────────────────────────────────────────────
+function solve() {
+  var vn=varNames(); var total=1<<N;
+  var ones=[],zeros=[],dc=[];
+  for(var m=0;m<total;m++){
+    var v=CELLS[m]===undefined?0:CELLS[m];
+    if(v===1)ones.push(m); else if(v===0)zeros.push(m); else dc.push(m);
+  }
+  var expr='',sel=[];
+  if(MODE==='SOP'){
+    if(!ones.length){expr='0';}
+    else if(!zeros.length&&!dc.length){expr='1';}
+    else{sel=qmc(ones,dc);expr=sel.map(function(g){return impToSOP(g,vn);}).join(' + ')||'0';}
+  } else {
+    if(!zeros.length){expr='1';}
+    else if(!ones.length&&!dc.length){expr='0';}
+    else{sel=qmc(zeros,dc);expr=sel.map(function(g){return impToPOS(g,vn);}).join(' \u00b7 ')||'1';}
+  }
+  GROUPS=sel;
+  var el=document.getElementById('expr-display');
+  el.className='expr-display'; el.textContent='F = '+expr;
+  document.getElementById('expr-label').textContent='Simplified '+MODE+' Expression';
+  renderSteps(sel,vn); highlightCells(sel); renderLegend(sel,vn); highlightTT(sel);
+}
+
+function renderSteps(gs,vn){
+  var list=document.getElementById('steps-list');
+  if(!gs.length){list.innerHTML='<div style="font-family:var(--font-mono);font-size:11px;color:var(--muted)">Expression is constant &mdash; no groupings needed.</div>';return;}
+  list.innerHTML=gs.map(function(g,i){
+    var col=GCOL[i%GCOL.length];
+    var sz=g.terms.length;
+    var szLabel=sz===1?'1-cell':sz+'-cell (2^'+(Math.log2(sz)|0)+' group)';
+    var varExpr=MODE==='SOP'?impToSOP(g,vn):impToPOS(g,vn);
+    var elim=0;
+    for(var b=N-1;b>=0;b--){if(g.mask&(1<<b))elim++;}
+    return '<div class="step-item" style="animation-delay:'+(i*0.06)+'s">'
+      +'<span class="step-num">'+(i+1)+'</span>'
+      +'<span class="step-text">'
+      +'<span class="grp-badge" style="background:'+col+'22;border-color:'+col+';color:'+col+'">'+szLabel+'</span>'
+      +'Minterms <strong>{'+g.terms.join(', ')+'}</strong>'
+      +' \u2192 '+elim+' var'+(elim!==1?'s':'')+' eliminated'
+      +' \u2192 <strong>'+varExpr+'</strong>'
+      +'</span></div>';
+  }).join('');
+}
+
+function highlightCells(gs){
+  document.querySelectorAll('.kmap-cell').forEach(function(c){c.style.outline='';c.style.outlineOffset='';});
+  gs.forEach(function(g,i){
+    var col=GCOL[i%GCOL.length];
+    g.terms.forEach(function(mt){
+      var cv=document.getElementById('cv-'+mt);
+      if(cv){cv.style.outline='2px solid '+col;cv.style.outlineOffset='-2px';cv.style.borderRadius='3px';}
+    });
+  });
+}
+
+function renderLegend(gs,vn){
+  document.getElementById('legend').innerHTML=gs.map(function(g,i){
+    var col=GCOL[i%GCOL.length];
+    var expr=MODE==='SOP'?impToSOP(g,vn):impToPOS(g,vn);
+    return '<span style="display:inline-flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size:10px;color:'+col+'">'
+      +'<span style="width:9px;height:9px;border-radius:2px;background:'+col+'33;border:1.5px solid '+col+';flex-shrink:0"></span>'+expr+'</span>';
+  }).join('');
+}
+
+function highlightTT(gs){
+  document.querySelectorAll('.tt-hl').forEach(function(r){r.classList.remove('tt-hl');});
+  var seen={};
+  gs.forEach(function(g){g.terms.forEach(function(t){seen[t]=true;});});
+  Object.keys(seen).forEach(function(m){
+    var r=document.getElementById('ttr-'+m); if(r)r.classList.add('tt-hl');
+  });
+}
+
+function clearResults(){
+  GROUPS=[];
+  document.querySelectorAll('.kmap-cell').forEach(function(c){c.style.outline='';c.style.outlineOffset='';});
+  document.getElementById('steps-list').innerHTML='<div style="font-family:var(--font-mono);font-size:11px;color:var(--muted)">Groups appear here after solving&hellip;</div>';
+  document.getElementById('expr-display').className='expr-display empty';
+  document.getElementById('expr-display').textContent='Click \u26A1 Solve to simplify \u2192';
+  document.getElementById('legend').innerHTML='';
+  document.querySelectorAll('.tt-hl').forEach(function(r){r.classList.remove('tt-hl');});
+}
+
+// ─── CONTROLS ────────────────────────────────────────────────────────
+function setVars(n){
+  N=n; CELLS={};
+  document.querySelectorAll('.var-btn').forEach(function(b){b.classList.toggle('active',parseInt(b.dataset.v)===n);});
+  ['vn0','vn1','vn2','vn3','vn4'].forEach(function(id,i){
+    var el=document.getElementById(id); if(el)el.style.display=i<n?'':'none';
+  });
+  renderKmap(); clearResults();
+}
+function setMode(m){
+  MODE=m;
+  document.getElementById('btn-sop').classList.toggle('active',m==='SOP');
+  document.getElementById('btn-pos').classList.toggle('active',m==='POS');
+  clearResults();
+}
+function onRename(){renderKmap();clearResults();}
+function clearAll(){CELLS={};renderKmap();clearResults();}
+function copyExpr(){
+  var txt=document.getElementById('expr-display').textContent;
+  if(txt&&txt.indexOf('Click')<0){
+    navigator.clipboard.writeText(txt).then(function(){
+      var btn=document.querySelector('.copy-btn');
+      btn.textContent='\u2713 Copied!'; btn.style.color='var(--accent)';
+      setTimeout(function(){btn.textContent='\u2398 Copy';btn.style.color='';},1500);
+    });
+  }
+}
+
+// ─── TOAST ────────────────────────────────────────────────────────────
+function showToast(msg,dur){
+  dur=dur||2500;
+  var t=document.getElementById('export-toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},dur);
+}
+
+// ─── EXPORT TO CANVAS ─────────────────────────────────────────────────
+/*
+  Builds a gate-level SOP or POS circuit from the solved groups.
+  SOP:  INPUTs → NOTs → AND gates per group → OR to combine → OUTPUT
+  POS:  INPUTs → NOTs → OR gates per group  → AND to combine → OUTPUT
+  Saves JSON to localStorage('lf_kmap_export') and navigates to index.html.
+  app.js picks it up on init (patch applied separately).
+*/
+function exportToCanvas() {
+  if(!GROUPS.length){ solve(); }
+  if(!GROUPS.length){ showToast('Nothing to export \u2014 expression is constant.'); return; }
+
+  var vn=varNames();
+  var gs=GROUPS;
+  var idCtr=1;
+  function nid(){return idCtr++;}
+
+  var gates=[], conns=[];
+  var COL_IN=60, COL_NOT=200, COL_AND=360, COL_OR=520, COL_OUT=670;
+  var ROW_H=74;
+
+  // Column 0: INPUT gates
+  var inputIds={};
+  vn.forEach(function(name,i){
+    var id=nid();
+    inputIds[i]=id;
+    gates.push({id:id,type:'INPUT',x:COL_IN,y:60+i*ROW_H,value:0,label:name});
+  });
+
+  // Column 1: NOT gates
+  var notIds={};
+  vn.forEach(function(name,i){
+    var id=nid();
+    notIds[i]=id;
+    gates.push({id:id,type:'NOT',x:COL_NOT,y:55+i*ROW_H});
+    conns.push({fromId:inputIds[i],fromPin:0,toId:id,toPin:0});
+  });
+
+  // Column 2: per-group AND (SOP) or OR (POS) gates
+  var groupSrcs=[]; // {srcId, srcPin} for each group
+  var totalH=(gs.length-1)*ROW_H;
+  var grpStartY=60+Math.max(0,(N*ROW_H-totalH)/2-ROW_H/2);
+
+  gs.forEach(function(g,gi){
+    var gY=grpStartY+gi*ROW_H;
+
+    // Collect literals for this group
+    var lits=[];
+    for(var b=N-1;b>=0;b--){
+      if(g.mask&(1<<b))continue;
+      var vi=N-1-b;
+      var bit=(g.terms[0]>>b)&1;
+      // SOP: 1→true literal (INPUT), 0→complemented (NOT)
+      // POS: 0→true literal (INPUT), 1→complemented (NOT)
+      var inv=(MODE==='SOP')?(bit===0):(bit===1);
+      lits.push({vi:vi,inv:inv});
+    }
+
+    if(lits.length===0){groupSrcs.push(null);return;}
+    if(lits.length===1){
+      var l=lits[0];
+      groupSrcs.push({srcId:l.inv?notIds[l.vi]:inputIds[l.vi],srcPin:0});
+      return;
+    }
+
+    var numLits=Math.min(lits.length,4);
+    var gType;
+    if(MODE==='SOP'){
+      gType=numLits===2?'AND':numLits===3?'AND3':'AND4';
+    } else {
+      gType=numLits===2?'OR':numLits===3?'OR3':'OR4';
+    }
+    var gid=nid();
+    var gH=numLits===2?50:numLits===3?58:66;
+    gates.push({id:gid,type:gType,x:COL_AND,y:gY-gH/2});
+    lits.slice(0,4).forEach(function(l,pi){
+      conns.push({fromId:l.inv?notIds[l.vi]:inputIds[l.vi],fromPin:0,toId:gid,toPin:pi});
+    });
+    groupSrcs.push({srcId:gid,srcPin:0});
+  });
+
+  var realSrcs=groupSrcs.filter(function(s){return s!==null;});
+
+  if(!realSrcs.length){showToast('Nothing to export \u2014 expression is constant.');return;}
+
+  // Column 3: combine groups
+  var finalSrcId, finalSrcPin=0;
+  if(realSrcs.length===1){
+    finalSrcId=realSrcs[0].srcId; finalSrcPin=realSrcs[0].srcPin;
+  } else {
+    var numG=Math.min(realSrcs.length,4);
+    var combType;
+    if(MODE==='SOP'){combType=numG===2?'OR':numG===3?'OR3':'OR4';}
+    else{combType=numG===2?'AND':numG===3?'AND3':'AND4';}
+    var combId=nid();
+    var combH=numG===2?50:numG===3?58:66;
+    var combY=grpStartY+((gs.length-1)/2)*ROW_H-combH/2;
+    gates.push({id:combId,type:combType,x:COL_OR,y:combY});
+    realSrcs.slice(0,4).forEach(function(s,pi){
+      conns.push({fromId:s.srcId,fromPin:s.srcPin,toId:combId,toPin:pi});
+    });
+    finalSrcId=combId; finalSrcPin=0;
+  }
+
+  // Output gate
+  var outId=nid();
+  var outX=realSrcs.length>1?COL_OUT:COL_OR;
+  var outY=60+(N/2-0.5)*ROW_H;
+  gates.push({id:outId,type:'OUTPUT',x:outX,y:outY,label:'F'});
+  conns.push({fromId:finalSrcId,fromPin:finalSrcPin,toId:outId,toPin:0});
+
+  var circuit={gates:gates,connections:conns,nextId:idCtr};
+  try {
+    localStorage.setItem('lf_kmap_export',JSON.stringify(circuit));
+    showToast('Circuit built! Sending to Simulator\u2026', 2200);
+    setTimeout(function(){window.location.href='index.html';},1800);
+  } catch(e) {
+    showToast('Export failed \u2014 localStorage full? Try fewer variables.');
+  }
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────
+renderKmap();
+</script>
+<script src="profile.js"></script>
+</body>
+</html>

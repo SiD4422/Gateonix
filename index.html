@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gateonix — Circuit Simulator</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    /* ── Site nav bar — matches ABOUT/help/Devloper/Feedback nav exactly ── */
+    #site-nav {
+      height: 56px;
+      background: rgba(8,10,14,0.95);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+      gap: 20px;
+      flex-shrink: 0;
+      z-index: 300;
+      position: relative;
+    }
+    #site-nav .sn-logo {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; flex-shrink: 0;
+    }
+    #site-nav .sn-logo-icon {
+      font-size: 22px; color: #00d4aa;
+      animation: sn-pulse 2.5s ease-in-out infinite;
+    }
+    @keyframes sn-pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+    #site-nav .sn-logo-name {
+      font-family: 'Syne', sans-serif; font-weight: 800;
+      font-size: 18px; letter-spacing: -0.02em; color: #e2e8f0;
+      white-space: nowrap;
+    }
+    #site-nav .sn-links {
+      display: flex; gap: 4px; align-items: center;
+      margin-left: auto;
+    }
+    #site-nav .sn-link {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px; font-weight: 500;
+      color: #64748b; text-decoration: none;
+      padding: 6px 14px; border-radius: 6px;
+      transition: all 0.15s; letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+    #site-nav .sn-link:hover { color: #e2e8f0; background: #161b24; }
+    #site-nav .sn-link.active { color: #00d4aa; background: rgba(0,212,170,0.08); }
+    #site-nav .sn-cta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px; font-weight: 700;
+      color: #050e0b; background: #00d4aa;
+      border: none; padding: 7px 16px;
+      border-radius: 6px; text-decoration: none;
+      transition: all 0.15s; letter-spacing: 0.04em;
+      cursor: pointer; white-space: nowrap;
+      flex-shrink: 0;
+    }
+    #site-nav .sn-cta:hover { background: #00ffcc; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,212,170,0.28); }
+    /* Adjust app height to account for site-nav */
+    #app { height: calc(100vh - 56px); }
+
+    /* ── Circuit status indicator (replaces logo in topbar) ── */
+    .circuit-status {
+      display: flex; align-items: center; gap: 7px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 0.08em;
+      flex-shrink: 0;
+      padding: 5px 12px;
+      background: rgba(0,212,170,0.06);
+      border: 1px solid rgba(0,212,170,0.15);
+      border-radius: 6px;
+    }
+    .cs-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #00e676;
+      box-shadow: 0 0 6px #00e676;
+      animation: cs-pulse 1.8s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+    @keyframes cs-pulse {
+      0%,100% { opacity: 1; box-shadow: 0 0 6px #00e676; }
+      50%      { opacity: 0.4; box-shadow: none; }
+    }
+    .cs-label { color: #00d4aa; font-weight: 700; letter-spacing: 0.14em; }
+    .cs-sep   { color: rgba(255,255,255,0.15); }
+    .cs-stat  { color: #7d8a9a; transition: color 0.2s; }
+    .cs-stat.active { color: #cdd5e0; }
+  </style>
+</head>
+<body>
+
+<!-- ── Site-wide navigation ── -->
+<nav id="site-nav">
+  <a class="sn-logo" href="ABOUT.html">
+    <span class="sn-logo-icon">⬡</span>
+    <span class="sn-logo-name">Gateonix</span>
+  </a>
+  <div class="sn-links">
+    <a href="index.html"    class="sn-link active">Simulator</a>
+    <a href="kmap.html"     class="sn-link">K-Map</a>
+    <a href="ABOUT.html"    class="sn-link">About</a>
+    <a href="help.html"     class="sn-link">Guide</a>
+    <a href="Devloper.html" class="sn-link">Developers</a>
+    <a href="Feedback.html" class="sn-link">Feedback</a>
+  </div>
+  <a href="login.html" class="sn-cta">Launch App →</a>
+</nav>
+
+<div id="app">
+
+  <!-- TOP BAR -->
+  <header id="topbar">
+    <div class="circuit-status" id="circuit-status">
+      <span class="cs-dot"></span>
+      <span class="cs-label">CIRCUIT</span>
+    </div>
+    <div class="tb-group">
+      <button class="tb-btn" id="btn-new">New</button>
+      <button class="tb-btn accent" id="btn-save-named">💾 Save Circuit</button>
+      <button class="tb-btn" id="btn-open-saved">📂 My Circuits</button>
+      <button class="tb-btn" id="btn-export">Export JSON</button>
+      <button class="tb-btn" id="btn-export-img">📤 Export</button>
+      <button class="tb-btn" id="btn-import">Import JSON</button>
+    </div>
+    <div class="tb-group">
+      <button class="tb-btn" id="btn-undo">↩ Undo</button>
+      <button class="tb-btn" id="btn-redo">↪ Redo</button>
+      <div class="tb-sep"></div>
+      <button class="tb-btn danger" id="btn-delete">⌫ Delete</button>
+      <div class="tb-sep"></div>
+      <button class="tb-btn accent2" id="btn-clock">▶ Clock</button>
+      <div class="tb-sep"></div>
+      <button class="tb-btn" id="btn-waveform">⏱ Waveform</button>
+      <div class="tb-sep"></div>
+      <button class="tb-btn accent" id="btn-bool-parser" title="Type a Boolean expression and auto-build the gate circuit">Σ Bool→Circuit</button>
+      <div class="tb-sep"></div>
+      <a href="kmap.html" class="tb-btn" id="btn-kmap" title="Open Karnaugh Map Solver" style="text-decoration:none;display:inline-flex;align-items:center;gap:5px;">🗺 K-Map</a>
+    </div>
+    <div class="tb-right">
+      <span id="status-msg" style="display:none"></span>
+      <span id="clock-badge" class="clk-off">CLK ●</span>
+      <!-- BB-8 Theme Toggle -->
+      <label class="bb8-toggle" title="Switch dark / light theme">
+        <input class="bb8-toggle__checkbox" type="checkbox" id="theme-toggle">
+        <div class="bb8-toggle__container">
+          <div class="bb8-toggle__scenery">
+            <div class="bb8-toggle__star"></div><div class="bb8-toggle__star"></div>
+            <div class="bb8-toggle__star"></div><div class="bb8-toggle__star"></div>
+            <div class="bb8-toggle__star"></div><div class="bb8-toggle__star"></div>
+            <div class="bb8-toggle__star"></div>
+            <div class="tatto-1"></div><div class="tatto-2"></div>
+            <div class="gomrassen"></div><div class="hermes"></div><div class="chenini"></div>
+            <div class="bb8-toggle__cloud"></div><div class="bb8-toggle__cloud"></div><div class="bb8-toggle__cloud"></div>
+          </div>
+          <div class="bb8">
+            <div class="bb8__head-container">
+              <div class="bb8__antenna"></div><div class="bb8__antenna"></div>
+              <div class="bb8__head"></div>
+            </div>
+            <div class="bb8__body"></div>
+          </div>
+          <div class="artificial__hidden"><div class="bb8__shadow"></div></div>
+        </div>
+      </label>
+      <div class="user-pill">
+        <span id="user-name">Guest</span>
+        <button id="btn-logout">⏻</button>
+      </div>
+    </div>
+  </header>
+
+  <div id="workspace">
+
+    <!-- LEFT PANEL -->
+    <aside id="left-panel">
+
+      <div class="ps">
+        <div class="ps-title">I/O</div>
+        <div class="palette-grid">
+          <div class="chip io" draggable="true" data-type="INPUT">
+            <svg viewBox="0 0 32 32" class="chip-sym"><rect x="4" y="8" width="24" height="16" rx="3" stroke="currentColor" stroke-width="2" fill="none"/><text x="16" y="21" text-anchor="middle" font-size="9" fill="currentColor" font-family="monospace" font-weight="bold">IN</text></svg>
+            <span>Input</span>
+          </div>
+          <div class="chip io" draggable="true" data-type="CLOCK">
+            <svg viewBox="0 0 32 32" class="chip-sym"><rect x="4" y="8" width="24" height="16" rx="3" stroke="currentColor" stroke-width="2" fill="none"/><path d="M10 18 L14 18 L14 14 L18 14 L18 18 L22 18" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+            <span>Clock</span>
+          </div>
+          <div class="chip io out" draggable="true" data-type="OUTPUT">
+            <svg viewBox="0 0 32 32" class="chip-sym"><circle cx="16" cy="16" r="10" stroke="currentColor" stroke-width="2" fill="none"/><text x="16" y="20" text-anchor="middle" font-size="9" fill="currentColor" font-family="monospace" font-weight="bold">OUT</text></svg>
+            <span>Output</span>
+          </div>
+          <div class="chip io out" draggable="true" data-type="LED">
+            <svg viewBox="0 0 32 32" class="chip-sym"><circle cx="16" cy="16" r="9" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="16" cy="16" r="4" fill="currentColor"/></svg>
+            <span>LED</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ps">
+        <div class="ps-title">Logic Gates</div>
+        <div class="palette-grid">
+          <div class="chip" draggable="true" data-type="AND"><svg viewBox="0 0 44 32" class="chip-sym gate-svg"><use href="#sym-AND"/></svg><span>AND</span></div>
+          <div class="chip" draggable="true" data-type="OR"><svg viewBox="0 0 44 32" class="chip-sym gate-svg"><use href="#sym-OR"/></svg><span>OR</span></div>
+          <div class="chip" draggable="true" data-type="NOT"><svg viewBox="0 0 44 32" class="chip-sym gate-svg"><use href="#sym-NOT"/></svg><span>NOT</span></div>
+          <div class="chip" draggable="true" data-type="NAND"><svg viewBox="0 0 44 32" class="chip-sym gate-svg"><use href="#sym-NAND"/></svg><span>NAND</span></div>
+          <div class="chip" draggable="true" data-type="NOR"><svg viewBox="0 0 44 32" class="chip-sym gate-svg"><use href="#sym-NOR"/></svg><span>NOR</span></div>
+          <div class="chip" draggable="true" data-type="XOR"><svg viewBox="0 0 44 32" class="chip-sym gate-svg"><use href="#sym-XOR"/></svg><span>XOR</span></div>
+          <div class="chip" draggable="true" data-type="XNOR"><svg viewBox="0 0 44 32" class="chip-sym gate-svg"><use href="#sym-XNOR"/></svg><span>XNOR</span></div>
+          <div class="chip" draggable="true" data-type="BUFFER"><svg viewBox="0 0 44 32" class="chip-sym gate-svg"><use href="#sym-BUFFER"/></svg><span>Buffer</span></div>
+        </div>
+      </div>
+
+      <div class="ps">
+        <div class="ps-title">Multi-Input</div>
+        <div class="palette-grid">
+          <div class="chip multi" draggable="true" data-type="AND3"><svg viewBox="0 0 44 36" class="chip-sym gate-svg"><use href="#sym-AND3"/></svg><span>AND-3</span></div>
+          <div class="chip multi" draggable="true" data-type="OR3"><svg viewBox="0 0 44 36" class="chip-sym gate-svg"><use href="#sym-OR3"/></svg><span>OR-3</span></div>
+          <div class="chip multi" draggable="true" data-type="AND4"><svg viewBox="0 0 44 40" class="chip-sym gate-svg"><use href="#sym-AND4"/></svg><span>AND-4</span></div>
+          <div class="chip multi" draggable="true" data-type="OR4"><svg viewBox="0 0 44 40" class="chip-sym gate-svg"><use href="#sym-OR4"/></svg><span>OR-4</span></div>
+        </div>
+      </div>
+
+      <div class="ps">
+        <div class="ps-title">Flip-Flops</div>
+        <div class="palette-grid">
+          <div class="chip ff" draggable="true" data-type="SR_FF"><svg viewBox="0 0 44 36" class="chip-sym"><rect x="6" y="4" width="28" height="28" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><text x="20" y="14" text-anchor="middle" font-size="6" fill="currentColor" font-family="monospace">SR</text><text x="20" y="25" text-anchor="middle" font-size="5" fill="currentColor" font-family="monospace">LATCH</text></svg><span>SR</span></div>
+          <div class="chip ff" draggable="true" data-type="D_FF"><svg viewBox="0 0 44 36" class="chip-sym"><rect x="6" y="4" width="28" height="28" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><text x="20" y="14" text-anchor="middle" font-size="6" fill="currentColor" font-family="monospace">D</text><text x="20" y="25" text-anchor="middle" font-size="5" fill="currentColor" font-family="monospace">FLIP-FLOP</text></svg><span>D-FF</span></div>
+          <div class="chip ff" draggable="true" data-type="JK_FF"><svg viewBox="0 0 44 36" class="chip-sym"><rect x="6" y="4" width="28" height="28" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><text x="20" y="14" text-anchor="middle" font-size="6" fill="currentColor" font-family="monospace">JK</text><text x="20" y="25" text-anchor="middle" font-size="5" fill="currentColor" font-family="monospace">FLIP-FLOP</text></svg><span>JK-FF</span></div>
+          <div class="chip ff" draggable="true" data-type="T_FF"><svg viewBox="0 0 44 36" class="chip-sym"><rect x="6" y="4" width="28" height="28" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><text x="20" y="14" text-anchor="middle" font-size="6" fill="currentColor" font-family="monospace">T</text><text x="20" y="25" text-anchor="middle" font-size="5" fill="currentColor" font-family="monospace">FLIP-FLOP</text></svg><span>T-FF</span></div>
+        </div>
+      </div>
+
+      <div class="ps">
+        <div class="ps-title">MUX / DEMUX</div>
+        <div class="palette-grid">
+          <div class="chip msi" draggable="true" data-type="MUX2"><svg viewBox="0 0 44 36" class="chip-sym"><polygon points="8,4 36,10 36,26 8,32" stroke="currentColor" stroke-width="1.5" fill="none"/><text x="22" y="19" text-anchor="middle" font-size="6" fill="currentColor" font-family="monospace">MUX 2:1</text></svg><span>MUX 2:1</span></div>
+          <div class="chip msi" draggable="true" data-type="MUX4"><svg viewBox="0 0 44 36" class="chip-sym"><polygon points="8,2 36,10 36,26 8,34" stroke="currentColor" stroke-width="1.5" fill="none"/><text x="22" y="19" text-anchor="middle" font-size="6" fill="currentColor" font-family="monospace">MUX 4:1</text></svg><span>MUX 4:1</span></div>
+          <div class="chip msi" draggable="true" data-type="DEMUX2"><svg viewBox="0 0 44 36" class="chip-sym"><polygon points="8,10 36,4 36,32 8,26" stroke="currentColor" stroke-width="1.5" fill="none"/><text x="22" y="19" text-anchor="middle" font-size="6" fill="currentColor" font-family="monospace">DMUX</text></svg><span>DEMUX</span></div>
+        </div>
+      </div>
+
+      <div class="ps">
+        <div class="ps-title">Encoders / Decoders</div>
+        <div class="palette-grid">
+          <div class="chip msi" draggable="true" data-type="DEC2"><svg viewBox="0 0 44 36" class="chip-sym"><rect x="6" y="4" width="28" height="28" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><text x="20" y="14" text-anchor="middle" font-size="6" fill="currentColor" font-family="monospace">DEC</text><text x="20" y="24" text-anchor="middle" font-size="5" fill="currentColor" font-family="monospace">2→4</text></svg><span>DEC 2:4</span></div>
+          <div class="chip msi" draggable="true" data-type="DEC3"><svg viewBox="0 0 44 36" class="chip-sym"><rect x="6" y="4" width="28" height="28" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><text x="20" y="14" text-anchor="middle" font-size="6" fill="currentColor" font-family="monospace">DEC</text><text x="20" y="24" text-anchor="middle" font-size="5" fill="currentColor" font-family="monospace">3→8</text></svg><span>DEC 3:8</span></div>
+          <div class="chip msi" draggable="true" data-type="ENC4"><svg viewBox="0 0 44 36" class="chip-sym"><rect x="6" y="4" width="28" height="28" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><text x="20" y="14" text-anchor="middle" font-size="6" fill="currentColor" font-family="monospace">ENC</text><text x="20" y="24" text-anchor="middle" font-size="5" fill="currentColor" font-family="monospace">4→2</text></svg><span>ENC 4:2</span></div>
+          <div class="chip msi" draggable="true" data-type="PRIO4"><svg viewBox="0 0 44 36" class="chip-sym"><rect x="6" y="4" width="28" height="28" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><text x="20" y="14" text-anchor="middle" font-size="6" fill="currentColor" font-family="monospace">PRIO</text><text x="20" y="24" text-anchor="middle" font-size="5" fill="currentColor" font-family="monospace">4:2</text></svg><span>Priority</span></div>
+        </div>
+      </div>
+
+      <div class="ps">
+        <div class="ps-title">Arithmetic / Display</div>
+        <div class="palette-grid">
+          <div class="chip msi" draggable="true" data-type="HADD"><svg viewBox="0 0 44 36" class="chip-sym"><rect x="6" y="4" width="28" height="28" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><text x="20" y="14" text-anchor="middle" font-size="6" fill="currentColor" font-family="monospace">HALF</text><text x="20" y="24" text-anchor="middle" font-size="5" fill="currentColor" font-family="monospace">ADDER</text></svg><span>Half Add</span></div>
+          <div class="chip msi" draggable="true" data-type="FADD"><svg viewBox="0 0 44 36" class="chip-sym"><rect x="6" y="4" width="28" height="28" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><text x="20" y="14" text-anchor="middle" font-size="6" fill="currentColor" font-family="monospace">FULL</text><text x="20" y="24" text-anchor="middle" font-size="5" fill="currentColor" font-family="monospace">ADDER</text></svg><span>Full Add</span></div>
+          <div class="chip msi" draggable="true" data-type="COMP1"><svg viewBox="0 0 44 36" class="chip-sym"><rect x="6" y="4" width="28" height="28" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><text x="20" y="20" text-anchor="middle" font-size="10" fill="currentColor" font-family="monospace">A≷B</text></svg><span>Compare</span></div>
+          <div class="chip msi" draggable="true" data-type="BIN2HEX"><svg viewBox="0 0 44 36" class="chip-sym"><rect x="6" y="4" width="28" height="28" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><text x="20" y="13" text-anchor="middle" font-size="5" fill="currentColor" font-family="monospace">BIN</text><text x="20" y="22" text-anchor="middle" font-size="7" fill="currentColor" font-family="monospace">→HEX</text></svg><span>Bin→Hex</span></div>
+        </div>
+      </div>
+
+      <div class="ps">
+        <div class="ps-title">Built-in Templates</div>
+        <div class="tmpl-list">
+          <button class="tmpl-btn" data-tmpl="halfadder">Half Adder</button>
+          <button class="tmpl-btn" data-tmpl="fulladder">Full Adder</button>
+          <button class="tmpl-btn" data-tmpl="mux">2:1 Mux</button>
+          <button class="tmpl-btn" data-tmpl="decoder">2-to-4 Decoder</button>
+          <button class="tmpl-btn" data-tmpl="mux2">MUX 2:1 (IC)</button>
+          <button class="tmpl-btn" data-tmpl="dec2ic">DEC 2:4 (IC)</button>
+          <button class="tmpl-btn" data-tmpl="dec3ic">DEC 3:8 (IC)</button>
+          <button class="tmpl-btn" data-tmpl="bin2hex">Bin→Hex Display</button>
+          <button class="tmpl-btn" data-tmpl="comparator">1-bit Comparator</button>
+          <button class="tmpl-btn" data-tmpl="enc4ic">Priority Encoder</button>
+          <button class="tmpl-btn" data-tmpl="counter2bit">2-bit Counter (Sync)</button>
+          <button class="tmpl-btn" data-tmpl="async2bitcounter">2-bit Async Counter</button>
+          <button class="tmpl-btn" data-tmpl="shift4">4-bit Shift Reg</button>
+          <div style="font-family:var(--font-mono);font-size:8px;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;padding:8px 4px 2px;border-top:1px solid rgba(255,255,255,0.06);margin-top:4px;">Universal Gates</div>
+          <button class="tmpl-btn" data-tmpl="and_nand">AND using NAND</button>
+          <button class="tmpl-btn" data-tmpl="or_nand">OR using NAND</button>
+          <button class="tmpl-btn" data-tmpl="not_nand">NOT using NAND</button>
+          <button class="tmpl-btn" data-tmpl="xor_nand">XOR using NAND</button>
+          <button class="tmpl-btn" data-tmpl="and_nor">AND using NOR</button>
+          <button class="tmpl-btn" data-tmpl="or_nor">OR using NOR</button>
+          <button class="tmpl-btn" data-tmpl="not_nor">NOT using NOR</button>
+          <button class="tmpl-btn" data-tmpl="xor_nor">XOR using NOR</button>
+          <div style="font-family:var(--font-mono);font-size:8px;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;padding:8px 4px 2px;border-top:1px solid rgba(255,255,255,0.06);margin-top:4px;">FF Conversions</div>
+          <button class="tmpl-btn" data-tmpl="sr_to_d">SR → D FF</button>
+          <button class="tmpl-btn" data-tmpl="sr_to_jk">SR → JK FF</button>
+          <button class="tmpl-btn" data-tmpl="sr_to_t">SR → T FF</button>
+          <button class="tmpl-btn" data-tmpl="d_to_sr">D → SR FF</button>
+          <button class="tmpl-btn" data-tmpl="d_to_jk">D → JK FF</button>
+          <button class="tmpl-btn" data-tmpl="d_to_t">D → T FF</button>
+          <button class="tmpl-btn" data-tmpl="jk_to_sr">JK → SR FF</button>
+          <button class="tmpl-btn" data-tmpl="jk_to_d">JK → D FF</button>
+          <button class="tmpl-btn" data-tmpl="jk_to_t">JK → T FF</button>
+          <button class="tmpl-btn" data-tmpl="t_to_d">T → D FF</button>
+          <button class="tmpl-btn" data-tmpl="t_to_jk">T → JK FF</button>
+          <div style="font-family:var(--font-mono);font-size:8px;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;padding:8px 4px 2px;border-top:1px solid rgba(255,255,255,0.06);margin-top:4px;">Custom Counters</div>
+          <button class="tmpl-btn" data-tmpl="cnt_013457">Seq: 0→1→3→4→5→7 (T-FF)</button>
+         
+        </div>
+      </div>
+
+      <div class="ps">
+        <div class="ps-title" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+          <span>My Templates</span>
+          <button class="tb-btn accent" id="btn-save-tmpl" style="padding:2px 7px;font-size:9px">+ Save</button>
+        </div>
+        <div id="user-tmpl-list"></div>
+      </div>
+
+    </aside>
+
+    <!-- CENTER: Canvas -->
+    <div id="canvas-area">
+      <canvas id="main-canvas"></canvas>
+      <div id="zoom-bar">
+        <button id="z-in">+</button>
+        <span id="z-label">100%</span>
+        <button id="z-out">−</button>
+        <button id="z-fit">⊡ Fit</button>
+      </div>
+      <div id="minimap-box">
+        <canvas id="mini-canvas"></canvas>
+      </div>
+    </div>
+
+    <!-- RIGHT: Code Panel -->
+    <aside id="right-panel">
+
+      <!-- Header with language tabs -->
+      <div id="cp-header">
+        <div id="cp-title-row">
+          <span id="cp-icon">⌨</span>
+          <span id="cp-title">Code</span>
+          <span id="cp-badge">Live</span>
+        </div>
+        <div id="cp-lang-tabs">
+          <button class="cp-lang active" data-lang="json">JSON</button>
+          <button class="cp-lang" data-lang="python">Python</button>
+          <button class="cp-lang" data-lang="c">C</button>
+          <button class="cp-lang" data-lang="cpp">C++</button>
+          <button class="cp-lang" data-lang="verilog">Verilog</button>
+          <button class="cp-lang" data-lang="vhdl">VHDL</button>
+        </div>
+      </div>
+
+      <!-- Editor area -->
+      <div id="cp-editor-wrap">
+        <div id="cp-line-nums"></div>
+        <textarea id="cp-editor" spellcheck="false" autocorrect="off" autocomplete="off" autocapitalize="off"></textarea>
+      </div>
+
+      <!-- Action bar -->
+      <div id="cp-actions">
+        <button class="cpab" id="cpab-copy" title="Copy to clipboard">⎘ Copy</button>
+        <button class="cpab ok" id="cpab-apply" title="Apply JSON to canvas (Ctrl+Enter) — JSON only">▶ Apply</button>
+        <button class="cpab" id="cpab-format" title="Format code">⊞ Format</button>
+      </div>
+
+      <!-- Status bar -->
+      <div id="cp-status">
+        <span id="cp-dot"></span>
+        <span id="cp-msg">Synced</span>
+        <span id="cp-hint">JSON: Ctrl+Enter to apply</span>
+      </div>
+
+    </aside>
+
+  </div>
+</div>
+
+<!-- ===== MODALS ===== -->
+<div class="modal-overlay" id="modal-save">
+  <div class="modal">
+    <div class="modal-title">💾 Save Circuit</div>
+    <div class="modal-body">
+      <div class="field"><label>Circuit Name</label><input type="text" id="save-name" placeholder="e.g. Half Adder, My ALU..." maxlength="60"/></div>
+      <div class="field"><label>Description (optional)</label><input type="text" id="save-desc" placeholder="Brief description..." maxlength="120"/></div>
+    </div>
+    <div class="modal-footer">
+      <button class="mb-cancel" id="save-cancel">Cancel</button>
+      <button class="mb-ok" id="save-ok">Save →</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-circuits">
+  <div class="modal modal-wide">
+    <div class="modal-title">📂 My Saved Circuits</div>
+    <div class="modal-body"><div id="circuits-list"></div></div>
+    <div class="modal-footer"><button class="mb-cancel" id="circuits-close">Close</button></div>
+  </div>
+</div>
+
+<!-- SVG gate symbols -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <defs>
+    <symbol id="sym-AND" viewBox="0 0 44 32"><path d="M8 6 H22 A12 12 0 0 1 22 26 H8 Z" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/><line x1="4" y1="11" x2="8" y2="11" stroke="currentColor" stroke-width="1.5"/><line x1="4" y1="21" x2="8" y2="21" stroke="currentColor" stroke-width="1.5"/><line x1="34" y1="16" x2="40" y2="16" stroke="currentColor" stroke-width="1.5"/></symbol>
+    <symbol id="sym-OR" viewBox="0 0 44 32"><path d="M8 6 Q14 16 8 26 Q22 22 32 16 Q22 10 8 6 Z" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/><line x1="4" y1="11" x2="11" y2="11" stroke="currentColor" stroke-width="1.5"/><line x1="4" y1="21" x2="11" y2="21" stroke="currentColor" stroke-width="1.5"/><line x1="32" y1="16" x2="40" y2="16" stroke="currentColor" stroke-width="1.5"/></symbol>
+    <symbol id="sym-NOT" viewBox="0 0 44 32"><path d="M8 6 L8 26 L30 16 Z" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/><circle cx="33" cy="16" r="3" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="4" y1="16" x2="8" y2="16" stroke="currentColor" stroke-width="1.5"/><line x1="36" y1="16" x2="40" y2="16" stroke="currentColor" stroke-width="1.5"/></symbol>
+    <symbol id="sym-NAND" viewBox="0 0 44 32"><path d="M8 6 H21 A11 11 0 0 1 21 26 H8 Z" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/><circle cx="35" cy="16" r="3" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="4" y1="11" x2="8" y2="11" stroke="currentColor" stroke-width="1.5"/><line x1="4" y1="21" x2="8" y2="21" stroke="currentColor" stroke-width="1.5"/><line x1="38" y1="16" x2="40" y2="16" stroke="currentColor" stroke-width="1.5"/></symbol>
+    <symbol id="sym-NOR" viewBox="0 0 44 32"><path d="M8 6 Q14 16 8 26 Q22 22 30 16 Q22 10 8 6 Z" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="33" cy="16" r="3" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="4" y1="11" x2="11" y2="11" stroke="currentColor" stroke-width="1.5"/><line x1="4" y1="21" x2="11" y2="21" stroke="currentColor" stroke-width="1.5"/><line x1="36" y1="16" x2="40" y2="16" stroke="currentColor" stroke-width="1.5"/></symbol>
+    <symbol id="sym-XOR" viewBox="0 0 44 32"><path d="M10 6 Q16 16 10 26 Q24 22 34 16 Q24 10 10 6 Z" stroke="currentColor" stroke-width="2" fill="none"/><path d="M6 6 Q12 16 6 26" stroke="currentColor" stroke-width="2" fill="none"/><line x1="4" y1="11" x2="13" y2="11" stroke="currentColor" stroke-width="1.5"/><line x1="4" y1="21" x2="13" y2="21" stroke="currentColor" stroke-width="1.5"/><line x1="34" y1="16" x2="40" y2="16" stroke="currentColor" stroke-width="1.5"/></symbol>
+    <symbol id="sym-XNOR" viewBox="0 0 44 32"><path d="M10 6 Q16 16 10 26 Q24 22 32 16 Q24 10 10 6 Z" stroke="currentColor" stroke-width="2" fill="none"/><path d="M6 6 Q12 16 6 26" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="35" cy="16" r="3" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="4" y1="11" x2="13" y2="11" stroke="currentColor" stroke-width="1.5"/><line x1="4" y1="21" x2="13" y2="21" stroke="currentColor" stroke-width="1.5"/><line x1="38" y1="16" x2="40" y2="16" stroke="currentColor" stroke-width="1.5"/></symbol>
+    <symbol id="sym-BUFFER" viewBox="0 0 44 32"><path d="M8 6 L8 26 L32 16 Z" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/><line x1="4" y1="16" x2="8" y2="16" stroke="currentColor" stroke-width="1.5"/><line x1="32" y1="16" x2="40" y2="16" stroke="currentColor" stroke-width="1.5"/></symbol>
+    <symbol id="sym-AND3" viewBox="0 0 44 36"><path d="M8 4 H22 A14 14 0 0 1 22 32 H8 Z" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/><line x1="4" y1="9" x2="8" y2="9" stroke="currentColor" stroke-width="1.5"/><line x1="4" y1="18" x2="8" y2="18" stroke="currentColor" stroke-width="1.5"/><line x1="4" y1="27" x2="8" y2="27" stroke="currentColor" stroke-width="1.5"/><line x1="36" y1="18" x2="40" y2="18" stroke="currentColor" stroke-width="1.5"/></symbol>
+    <symbol id="sym-OR3" viewBox="0 0 44 36"><path d="M8 4 Q15 18 8 32 Q23 26 34 18 Q23 10 8 4 Z" stroke="currentColor" stroke-width="2" fill="none"/><line x1="4" y1="9" x2="12" y2="9" stroke="currentColor" stroke-width="1.5"/><line x1="4" y1="18" x2="11" y2="18" stroke="currentColor" stroke-width="1.5"/><line x1="4" y1="27" x2="12" y2="27" stroke="currentColor" stroke-width="1.5"/><line x1="34" y1="18" x2="40" y2="18" stroke="currentColor" stroke-width="1.5"/></symbol>
+    <symbol id="sym-AND4" viewBox="0 0 44 40"><path d="M8 4 H22 A16 16 0 0 1 22 36 H8 Z" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/><line x1="4" y1="9" x2="8" y2="9" stroke="currentColor" stroke-width="1.5"/><line x1="4" y1="16" x2="8" y2="16" stroke="currentColor" stroke-width="1.5"/><line x1="4" y1="24" x2="8" y2="24" stroke="currentColor" stroke-width="1.5"/><line x1="4" y1="31" x2="8" y2="31" stroke="currentColor" stroke-width="1.5"/><line x1="38" y1="20" x2="40" y2="20" stroke="currentColor" stroke-width="1.5"/></symbol>
+    <symbol id="sym-OR4" viewBox="0 0 44 40"><path d="M8 4 Q16 20 8 36 Q24 30 34 20 Q24 10 8 4 Z" stroke="currentColor" stroke-width="2" fill="none"/><line x1="4" y1="9" x2="13" y2="9" stroke="currentColor" stroke-width="1.5"/><line x1="4" y1="16" x2="12" y2="16" stroke="currentColor" stroke-width="1.5"/><line x1="4" y1="24" x2="12" y2="24" stroke="currentColor" stroke-width="1.5"/><line x1="4" y1="31" x2="13" y2="31" stroke="currentColor" stroke-width="1.5"/><line x1="34" y1="20" x2="40" y2="20" stroke="currentColor" stroke-width="1.5"/></symbol>
+  </defs>
+</svg>
+
+<input type="file" id="file-input" accept=".json" style="display:none"/>
+
+<script src="gates.js"></script>
+<script src="canvas.js"></script>
+<script src="waveform.js"></script>
+<script>WF.build();</script>
+<script src="codepanel.js"></script>
+<script>CodePanel.build();</script>
+<script src="app.js"></script>
+<script src="export.js"></script>
+<script src="boolparser.js"></script>
+<script>
+  LFExport.init();
+  // Wire Bool Parser button
+  document.getElementById('btn-bool-parser').addEventListener('click', function() {
+    BoolParser.open();
+  });
+  window.addEventListener('load', function() {
+    document.getElementById('btn-waveform').onclick = function(){ WF.toggle(); };
+
+    // BB-8 theme toggle
+    var toggle = document.getElementById('theme-toggle');
+    if (toggle) {
+      if (localStorage.getItem('lf_theme') === 'light') {
+        document.documentElement.setAttribute('data-theme','light');
+        toggle.checked = true;
+      }
+      toggle.addEventListener('change', function() {
+        if (this.checked) {
+          document.documentElement.setAttribute('data-theme','light');
+          localStorage.setItem('lf_theme','light');
+        } else {
+          document.documentElement.removeAttribute('data-theme');
+          localStorage.setItem('lf_theme','dark');
+        }
+      });
+    }
+
+    // Live circuit status counter — patches simulate()
+    var _origSimulate = window.simulate;
+    window.simulate = function() {
+      _origSimulate.apply(this, arguments);
+      var gc = (typeof Components  !== 'undefined') ? gates.length : 0;
+      var wc = (typeof connections !== 'undefined') ? connections.length : 0;
+      var gEl = document.getElementById('cs-gates');
+      var wEl = document.getElementById('cs-wires');
+      if (gEl) { gEl.textContent = gc + ' gate' + (gc!==1?'s':''); gEl.classList.toggle('active', gc>0); }
+      if (wEl) { wEl.textContent = wc + ' wire' + (wc!==1?'s':''); wEl.classList.toggle('active', wc>0); }
+    };
+  });
+</script>
+</body>
+</html>

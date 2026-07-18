@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gateonix — Guide & Troubleshooting</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:       #080a0e;
+      --panel:    #0f1218;
+      --surface:  #161b24;
+      --raised:   #1e2535;
+      --border:   rgba(255,255,255,0.07);
+      --border2:  rgba(255,255,255,0.13);
+      --accent:   #00d4aa;
+      --accent2:  #00ffcc;
+      --blue:     #40c4ff;
+      --purple:   #9c6bff;
+      --orange:   #ffa726;
+      --red:      #ff5252;
+      --green:    #00e676;
+      --text:     #e2e8f0;
+      --muted:    #64748b;
+      --font-ui:  'Syne', sans-serif;
+      --font-mono:'JetBrains Mono', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-ui);
+      overflow-x: hidden;
+    }
+
+    /* ── Background ── */
+    .bg-grid {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+    }
+    .bg-grid svg { width: 100%; height: 100%; opacity: 0.025; }
+    .orb {
+      position: fixed; border-radius: 50%; filter: blur(90px);
+      pointer-events: none; z-index: 0;
+    }
+    .orb1 { width: 460px; height: 460px; background: rgba(0,212,170,0.08);  top: -150px; right: -100px; }
+    .orb2 { width: 340px; height: 340px; background: rgba(64,196,255,0.06); bottom: 10%;  left: -80px; }
+
+    /* ── Nav ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: 56px;
+      background: rgba(8,10,14,0.85);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 32px; gap: 20px;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .nav-logo-icon { font-size: 22px; color: var(--accent); animation: pulse 2.5s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.55} }
+    .nav-logo-name { font-weight: 800; font-size: 18px; letter-spacing: -0.02em; color: var(--text); }
+    .nav-links { display: flex; gap: 4px; margin-left: auto; }
+    .nav-link {
+      font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+      color: var(--muted); text-decoration: none; padding: 6px 14px;
+      border-radius: 6px; transition: all 0.15s; letter-spacing: 0.04em;
+    }
+    .nav-link:hover { color: var(--text); background: var(--surface); }
+    .nav-link.active { color: var(--accent); background: rgba(0,212,170,0.08); }
+    .nav-cta {
+      font-family: var(--font-mono); font-size: 11px; font-weight: 700;
+      color: #050e0b; background: var(--accent); border: none;
+      padding: 7px 16px; border-radius: 6px; text-decoration: none;
+      transition: all 0.15s; letter-spacing: 0.04em;
+    }
+    .nav-cta:hover { background: var(--accent2); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,212,170,0.28); }
+
+    /* ── Layout ── */
+    .page-wrap {
+      position: relative; z-index: 1;
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: 100vh;
+      padding-top: 56px;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      position: sticky; top: 56px;
+      height: calc(100vh - 56px);
+      overflow-y: auto;
+      background: var(--panel);
+      border-right: 1px solid var(--border);
+      padding: 28px 0 40px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(0,212,170,0.2) transparent;
+    }
+    .sidebar::-webkit-scrollbar { width: 3px; }
+    .sidebar::-webkit-scrollbar-thumb { background: rgba(0,212,170,0.2); border-radius: 2px; }
+
+    .sb-section { margin-bottom: 28px; }
+    .sb-label {
+      font-family: var(--font-mono); font-size: 9px; font-weight: 700;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--muted); padding: 0 22px; margin-bottom: 8px; display: block;
+    }
+    .sb-link {
+      display: flex; align-items: center; gap: 9px;
+      font-family: var(--font-mono); font-size: 12px; font-weight: 500;
+      color: var(--muted); text-decoration: none;
+      padding: 7px 22px; transition: all 0.14s;
+      border-left: 2px solid transparent;
+    }
+    .sb-link:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+    .sb-link.active { color: var(--accent); border-left-color: var(--accent); background: rgba(0,212,170,0.06); }
+    .sb-link .sb-icon { font-size: 13px; width: 18px; text-align: center; flex-shrink: 0; }
+    .sb-progress {
+      height: 2px; background: var(--border);
+      margin: 18px 22px 0;
+    }
+    .sb-progress-fill {
+      height: 100%; background: var(--accent);
+      transition: width 0.3s ease;
+      width: 0%;
+    }
+    .sb-prog-label {
+      font-family: var(--font-mono); font-size: 9px; color: var(--muted);
+      padding: 4px 22px 0; letter-spacing: 0.08em;
+    }
+
+    /* ── Main content ── */
+    .content {
+      padding: 52px 60px 100px;
+      max-width: 860px;
+    }
+
+    /* ── Page header ── */
+    .page-header { margin-bottom: 56px; }
+    .page-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: var(--font-mono); font-size: 10px; font-weight: 700;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--accent); background: rgba(0,212,170,0.08);
+      border: 1px solid rgba(0,212,170,0.22);
+      padding: 4px 12px; border-radius: 20px; margin-bottom: 20px;
+    }
+    .page-title {
+      font-weight: 800; font-size: clamp(32px, 4vw, 52px);
+      letter-spacing: -0.04em; line-height: 1.05;
+      color: var(--text); margin-bottom: 16px;
+    }
+    .page-sub {
+      font-family: var(--font-mono); font-size: 14px;
+      color: var(--muted); line-height: 1.8; max-width: 540px;
+    }
+
+    /* ── Sections ── */
+    .guide-section {
+      margin-bottom: 72px;
+      scroll-margin-top: 80px;
+    }
+    .sec-header {
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 28px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sec-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+    }
+    .sec-num {
+      font-family: var(--font-mono); font-size: 11px; font-weight: 700;
+      color: var(--accent); letter-spacing: 0.1em;
+    }
+    .sec-title {
+      font-weight: 800; font-size: 22px; letter-spacing: -0.02em;
+      color: var(--text); margin-bottom: 2px;
+    }
+
+    /* ── Step cards ── */
+    .steps { display: flex; flex-direction: column; gap: 14px; }
+    .step {
+      display: grid;
+      grid-template-columns: 38px 1fr;
+      gap: 16px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 20px;
+      transition: border-color 0.18s;
+    }
+    .step:hover { border-color: var(--border2); }
+    .step-num {
+      width: 38px; height: 38px; border-radius: 9px;
+      background: rgba(0,212,170,0.08);
+      border: 1px solid rgba(0,212,170,0.2);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-mono); font-weight: 700; font-size: 13px;
+      color: var(--accent); flex-shrink: 0; margin-top: 2px;
+    }
+    .step-body {}
+    .step-title {
+      font-weight: 700; font-size: 14px; color: var(--text);
+      margin-bottom: 6px; letter-spacing: -0.01em;
+    }
+    .step-desc {
+      font-family: var(--font-mono); font-size: 12px;
+      color: var(--muted); line-height: 1.75;
+    }
+    .step-tip {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: var(--font-mono); font-size: 11px;
+      color: var(--accent); background: rgba(0,212,170,0.07);
+      border: 1px solid rgba(0,212,170,0.18);
+      border-radius: 6px; padding: 4px 10px; margin-top: 10px;
+    }
+
+    /* ── Info cards (tips/notes/warnings) ── */
+    .info-card {
+      display: flex; gap: 14px;
+      padding: 16px 18px;
+      border-radius: 10px;
+      border-left: 3px solid;
+      margin: 18px 0;
+      font-family: var(--font-mono); font-size: 12px;
+      line-height: 1.75;
+    }
+    .info-card .ic-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+    .info-card.tip  { background: rgba(0,212,170,0.06);  border-color: var(--accent);  color: #a0e8d8; }
+    .info-card.warn { background: rgba(255,167,38,0.07); border-color: var(--orange);  color: #d4b07a; }
+    .info-card.note { background: rgba(64,196,255,0.06); border-color: var(--blue);    color: #8acce8; }
+    .info-card.danger { background: rgba(255,82,82,0.07); border-color: var(--red);   color: #e09090; }
+
+    /* ── Kbd shortcuts ── */
+    .shortcut-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    }
+    .shortcut-row {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 14px;
+      transition: border-color 0.15s;
+    }
+    .shortcut-row:hover { border-color: var(--border2); }
+    .shortcut-desc {
+      font-family: var(--font-mono); font-size: 11px; color: var(--muted);
+    }
+    .kbd-group { display: flex; align-items: center; gap: 4px; }
+    kbd {
+      font-family: var(--font-mono); font-size: 10px; font-weight: 700;
+      color: var(--text); background: var(--raised);
+      border: 1px solid var(--border2);
+      border-bottom: 2px solid rgba(255,255,255,0.15);
+      border-radius: 5px; padding: 2px 7px;
+    }
+    .kbd-plus { font-size: 10px; color: var(--muted); }
+
+    /* ── Gate reference table ── */
+    .gate-table {
+      width: 100%; border-collapse: collapse;
+      font-family: var(--font-mono); font-size: 12px;
+      margin-top: 4px;
+    }
+    .gate-table th {
+      text-align: left; padding: 8px 14px;
+      font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted);
+      border-bottom: 1px solid var(--border2);
+      background: var(--panel);
+    }
+    .gate-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+      color: var(--muted);
+    }
+    .gate-table tr:last-child td { border-bottom: none; }
+    .gate-table tr:hover td { background: rgba(255,255,255,0.02); }
+    .gate-name {
+      font-weight: 700; color: var(--accent);
+      font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em;
+    }
+    .gate-cat-badge {
+      font-size: 9px; padding: 2px 7px; border-radius: 4px;
+      font-weight: 700; letter-spacing: 0.06em;
+    }
+    .cat-basic  { background: rgba(64,196,255,0.1);  color: var(--blue); }
+    .cat-ff     { background: rgba(156,107,255,0.1); color: var(--purple); }
+    .cat-msi    { background: rgba(0,230,118,0.1);   color: var(--green); }
+    .cat-io     { background: rgba(255,167,38,0.1);  color: var(--orange); }
+
+    /* ── FAQ / Troubleshooting ── */
+    .faq-list { display: flex; flex-direction: column; gap: 10px; }
+    .faq-item {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: border-color 0.18s;
+    }
+    .faq-item:hover { border-color: var(--border2); }
+    .faq-item.open { border-color: rgba(0,212,170,0.3); }
+    .faq-q {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 14px; padding: 18px 20px; cursor: pointer;
+      user-select: none;
+    }
+    .faq-q-text {
+      font-family: var(--font-ui); font-weight: 700; font-size: 14px;
+      color: var(--text); letter-spacing: -0.01em;
+      display: flex; align-items: flex-start; gap: 12px;
+    }
+    .faq-tag {
+      font-family: var(--font-mono); font-size: 9px; font-weight: 700;
+      letter-spacing: 0.1em; padding: 2px 8px; border-radius: 4px;
+      flex-shrink: 0; margin-top: 3px;
+    }
+    .tag-bug   { background: rgba(255,82,82,0.12);   color: var(--red);    border: 1px solid rgba(255,82,82,0.25); }
+    .tag-how   { background: rgba(0,212,170,0.1);    color: var(--accent); border: 1px solid rgba(0,212,170,0.22); }
+    .tag-perf  { background: rgba(255,167,38,0.1);   color: var(--orange); border: 1px solid rgba(255,167,38,0.22); }
+    .tag-data  { background: rgba(156,107,255,0.1);  color: var(--purple); border: 1px solid rgba(156,107,255,0.22); }
+    .faq-arrow {
+      font-size: 16px; color: var(--muted);
+      transition: transform 0.25s ease, color 0.18s;
+      flex-shrink: 0;
+    }
+    .faq-item.open .faq-arrow { transform: rotate(90deg); color: var(--accent); }
+    .faq-a {
+      max-height: 0; overflow: hidden;
+      transition: max-height 0.35s ease, padding 0.25s ease;
+      padding: 0 20px;
+    }
+    .faq-item.open .faq-a {
+      max-height: 400px;
+      padding: 0 20px 20px;
+    }
+    .faq-a-inner {
+      font-family: var(--font-mono); font-size: 12px;
+      color: var(--muted); line-height: 1.8;
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+    }
+    .faq-a-inner a { color: var(--accent); text-decoration: none; }
+    .faq-a-inner a:hover { text-decoration: underline; }
+    .faq-a-inner strong { color: var(--text); font-weight: 700; }
+
+    /* ── Code snippet ── */
+    .code-snip {
+      background: var(--raised);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #8899aa;
+      margin: 10px 0;
+      overflow-x: auto;
+    }
+    .code-snip .kw  { color: #40c4ff; }
+    .code-snip .str { color: #00e676; }
+    .code-snip .cm  { color: #3d4a5a; }
+
+    /* ── Video-style step visuals ── */
+    .visual-block {
+      background: var(--panel);
+      border: 1px solid var(--border2);
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 20px 0;
+    }
+    .vb-header {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 16px;
+      background: rgba(255,255,255,0.025);
+      border-bottom: 1px solid var(--border);
+    }
+    .vb-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .vb-dot.r { background: #ff5f57; }
+    .vb-dot.y { background: #febc2e; }
+    .vb-dot.g { background: #28c840; }
+    .vb-title { font-family: var(--font-mono); font-size: 10px; color: var(--muted); margin-left: 4px; }
+    .vb-body { padding: 20px; }
+
+    /* ── Signal legend ── */
+    .signal-legend {
+      display: flex; gap: 12px; flex-wrap: wrap; margin: 14px 0;
+    }
+    .sig-item {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: 8px; padding: 8px 14px;
+    }
+    .sig-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+    }
+    .sig-dot.hi { background: #00e676; box-shadow: 0 0 6px rgba(0,230,118,0.5); }
+    .sig-dot.lo { background: #ff4444; box-shadow: 0 0 6px rgba(255,68,68,0.4); }
+    .sig-dot.x  { background: #546e7a; }
+    .sig-label { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+
+    /* ── Scroll reveal ── */
+    .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── Divider ── */
+    .hdivider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border2) 20%, var(--border2) 80%, transparent);
+      margin: 56px 0;
+    }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 24px 32px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px;
+      position: relative; z-index: 1;
+      background: var(--panel);
+    }
+    .footer-logo { font-weight: 800; font-size: 14px; letter-spacing: -0.02em; color: var(--muted); }
+    .footer-logo span { color: var(--accent); }
+    .footer-links { display: flex; gap: 18px; }
+    .footer-links a { font-family: var(--font-mono); font-size: 11px; color: var(--muted); text-decoration: none; transition: color 0.15s; }
+    .footer-links a:hover { color: var(--text); }
+    .footer-copy { font-family: var(--font-mono); font-size: 10px; color: #2d3748; letter-spacing: 0.06em; }
+
+    @media (max-width: 760px) {
+      .page-wrap { grid-template-columns: 1fr; }
+      .sidebar { position: static; height: auto; border-right: none; border-bottom: 1px solid var(--border); }
+      .content { padding: 36px 24px 80px; }
+      .shortcut-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Background -->
+<div class="bg-grid">
+  <svg viewBox="0 0 1400 900" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+    <defs><pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M50 0H0V50" fill="none" stroke="white" stroke-width="0.5"/></pattern></defs>
+    <rect width="100%" height="100%" fill="url(#grid)"/>
+  </svg>
+</div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<!-- Nav -->
+<nav>
+  <a class="nav-logo" href="index.html">
+    <span class="nav-logo-icon">⬡</span>
+    <span class="nav-logo-name">Gateonix</span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html"    class="nav-link">Simulator</a>
+    <a href="ABOUT.html"    class="nav-link">About</a>
+    <a href="help.html"     class="nav-link active">Guide</a>
+    <a href="kmap.html" class="nav-link">K-Map</a>
+    <a href="Devloper.html" class="nav-link">Developers</a>
+    <a href="Feedback.html" class="nav-link">Feedback</a>
+    <a href="login.html"    class="nav-cta">Launch App →</a>
+  </div>
+</nav>
+
+<div class="page-wrap">
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="sb-section">
+      <span class="sb-label">Getting Started</span>
+      <a href="#getting-started" class="sb-link active" data-section="getting-started">
+        <span class="sb-icon">🚀</span> Quick Start
+      </a>
+      <a href="#interface" class="sb-link" data-section="interface">
+        <span class="sb-icon">🖥</span> Interface Tour
+      </a>
+      <a href="#building" class="sb-link" data-section="building">
+        <span class="sb-icon">⚡</span> Building Circuits
+      </a>
+    </div>
+    <div class="sb-section">
+      <span class="sb-label">Features</span>
+      <a href="#gates" class="sb-link" data-section="gates">
+        <span class="sb-icon">⬡</span> Gate Reference
+      </a>
+      <a href="#flipflops" class="sb-link" data-section="flipflops">
+        <span class="sb-icon">🔁</span> Flip-Flops
+      </a>
+      <a href="#waveform" class="sb-link" data-section="waveform">
+        <span class="sb-icon">⏱</span> Waveform Viewer
+      </a>
+      <a href="#export" class="sb-link" data-section="export">
+        <span class="sb-icon">📟</span> Code Export
+      </a>
+      <a href="#save" class="sb-link" data-section="save">
+        <span class="sb-icon">💾</span> Saving Circuits
+      </a>
+    </div>
+    <div class="sb-section">
+      <span class="sb-label">Reference</span>
+      <a href="#shortcuts" class="sb-link" data-section="shortcuts">
+        <span class="sb-icon">⌨</span> Shortcuts
+      </a>
+      <a href="#troubleshooting" class="sb-link" data-section="troubleshooting">
+        <span class="sb-icon">🔧</span> Troubleshooting
+      </a>
+    </div>
+    <div style="padding: 0 22px; margin-top: 8px;">
+      <div class="sb-progress"><div class="sb-progress-fill" id="progress-fill"></div></div>
+      <div class="sb-prog-label" id="progress-label">0% read</div>
+    </div>
+  </aside>
+
+  <!-- ── Content ── -->
+  <main class="content">
+
+    <!-- Page header -->
+    <div class="page-header reveal">
+      <div class="page-badge">📖 Documentation</div>
+      <h1 class="page-title">Guide &<br>Troubleshooting</h1>
+      <p class="page-sub">Everything you need to go from zero to a working circuit — plus answers to the most common problems.</p>
+    </div>
+
+    <!-- ── 1. QUICK START ── -->
+    <div class="guide-section reveal" id="getting-started">
+      <div class="sec-header">
+        <div class="sec-icon" style="background:rgba(0,212,170,0.1);border:1px solid rgba(0,212,170,0.2);">🚀</div>
+        <div>
+          <div class="sec-num">01 — GETTING STARTED</div>
+          <div class="sec-title">Quick Start</div>
+        </div>
+      </div>
+
+      <p style="font-family:var(--font-mono);font-size:13px;color:var(--muted);line-height:1.85;margin-bottom:24px;">
+        Gateonix runs entirely in your browser. No install, no account required — just open <code style="color:var(--accent);background:rgba(0,212,170,0.08);padding:2px 6px;border-radius:4px;">login.html</code> and either log in, register, or continue as Guest.
+      </p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <div class="step-title">Open the app</div>
+            <div class="step-desc">Open <strong style="color:var(--text)">login.html</strong> in any modern browser (Chrome, Firefox, Edge, Safari). Click <strong style="color:var(--text)">"Continue as Guest"</strong> for instant access — no account needed.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <div class="step-title">The canvas loads with a Half Adder template</div>
+            <div class="step-desc">A working circuit is pre-loaded so you can see signals flowing immediately. Green wires = HIGH (1), red wires = LOW (0). Click an INPUT gate to toggle it.</div>
+            <div class="step-tip">💡 Click the green/red box labelled "A" or "B" to flip the input value</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <div class="step-title">Drag a gate from the left panel</div>
+            <div class="step-desc">Every gate type lives in the left sidebar. Drag any chip onto the canvas to place it. It snaps to a 10px grid automatically.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <div class="step-title">Wire gates together</div>
+            <div class="step-desc">Hover over an output pin (right side of a gate) until the cursor turns into a crosshair, then click and drag to an input pin (left side). Release to complete the wire.</div>
+            <div class="step-tip">💡 Press Esc to cancel a wire in progress</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <div class="step-title">Watch the simulation update live</div>
+            <div class="step-desc">Every change is simulated instantly. Signal colours flow from inputs to outputs in real time — no "run" button needed.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-card tip" style="margin-top:20px;">
+        <span class="ic-icon">💡</span>
+        <span>Use the built-in <strong>Templates</strong> in the left panel to load ready-made circuits: Half Adder, Full Adder, 2:1 MUX, 2-to-4 Decoder, Comparator, and more. Great starting points for learning.</span>
+      </div>
+    </div>
+
+    <div class="hdivider"></div>
+
+    <!-- ── 2. INTERFACE TOUR ── -->
+    <div class="guide-section reveal" id="interface">
+      <div class="sec-header">
+        <div class="sec-icon" style="background:rgba(64,196,255,0.1);border:1px solid rgba(64,196,255,0.2);">🖥</div>
+        <div>
+          <div class="sec-num">02 — LAYOUT</div>
+          <div class="sec-title">Interface Tour</div>
+        </div>
+      </div>
+
+      <div class="visual-block">
+        <div class="vb-header">
+          <div class="vb-dot r"></div><div class="vb-dot y"></div><div class="vb-dot g"></div>
+          <span class="vb-title">Gateonix — Application Layout</span>
+        </div>
+        <div class="vb-body">
+          <svg viewBox="0 0 700 320" width="100%" style="font-family:'JetBrains Mono',monospace;">
+            <!-- Topbar -->
+            <rect x="0" y="0" width="700" height="38" rx="0" fill="#0d1117" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+            <text x="16" y="24" font-size="10" fill="#00d4aa" font-weight="700">⬡ Gateonix</text>
+            <rect x="120" y="10" width="44" height="18" rx="4" fill="#1e2535"/>
+            <text x="142" y="23" font-size="9" fill="#64748b" text-anchor="middle">New</text>
+            <rect x="170" y="10" width="72" height="18" rx="4" fill="rgba(0,212,170,0.15)" stroke="rgba(0,212,170,0.3)" stroke-width="0.5"/>
+            <text x="206" y="23" font-size="9" fill="#00d4aa" text-anchor="middle">💾 Save</text>
+            <rect x="248" y="10" width="60" height="18" rx="4" fill="#1e2535"/>
+            <text x="278" y="23" font-size="9" fill="#64748b" text-anchor="middle">📂 Open</text>
+            <text x="560" y="23" font-size="9" fill="#64748b">Ready</text>
+            <text x="620" y="23" font-size="9" fill="#64748b">⏻ Guest</text>
+            <!-- Left panel -->
+            <rect x="0" y="38" width="140" height="282" fill="#0f1218" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+            <text x="12" y="58" font-size="8" fill="#64748b" letter-spacing="1">I/O</text>
+            <rect x="8" y="64" width="58" height="28" rx="4" fill="#1e2535" stroke="rgba(255,167,38,0.3)" stroke-width="0.7"/>
+            <text x="37" y="82" font-size="8" fill="#ffa726" text-anchor="middle">INPUT</text>
+            <rect x="72" y="64" width="58" height="28" rx="4" fill="#1e2535" stroke="rgba(255,167,38,0.3)" stroke-width="0.7"/>
+            <text x="101" y="82" font-size="8" fill="#ffa726" text-anchor="middle">OUTPUT</text>
+            <text x="12" y="106" font-size="8" fill="#64748b" letter-spacing="1">GATES</text>
+            <rect x="8" y="112" width="38" height="24" rx="3" fill="#1e2535" stroke="rgba(255,255,255,0.07)" stroke-width="0.7"/>
+            <text x="27" y="128" font-size="8" fill="#7d8a9a" text-anchor="middle">AND</text>
+            <rect x="52" y="112" width="36" height="24" rx="3" fill="#1e2535" stroke="rgba(255,255,255,0.07)" stroke-width="0.7"/>
+            <text x="70" y="128" font-size="8" fill="#7d8a9a" text-anchor="middle">OR</text>
+            <rect x="94" y="112" width="36" height="24" rx="3" fill="#1e2535" stroke="rgba(255,255,255,0.07)" stroke-width="0.7"/>
+            <text x="112" y="128" font-size="8" fill="#7d8a9a" text-anchor="middle">NOT</text>
+            <text x="12" y="154" font-size="8" fill="#64748b" letter-spacing="1">TEMPLATES</text>
+            <rect x="8" y="160" width="124" height="20" rx="3" fill="rgba(0,212,170,0.06)" stroke="rgba(0,212,170,0.2)" stroke-width="0.7"/>
+            <text x="70" y="174" font-size="8" fill="#00d4aa" text-anchor="middle">Half Adder</text>
+            <rect x="8" y="185" width="124" height="20" rx="3" fill="rgba(0,212,170,0.06)" stroke="rgba(0,212,170,0.2)" stroke-width="0.7"/>
+            <text x="70" y="199" font-size="8" fill="#00d4aa" text-anchor="middle">Full Adder</text>
+            <!-- Canvas area -->
+            <rect x="140" y="38" width="380" height="242" fill="#090c11"/>
+            <!-- dot grid -->
+            <pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse">
+              <circle cx="10" cy="10" r="0.7" fill="rgba(255,255,255,0.06)"/>
+            </pattern>
+            <rect x="140" y="38" width="380" height="242" fill="url(#dots)"/>
+            <!-- sample circuit -->
+            <rect x="175" y="100" width="62" height="34" rx="4" fill="#1a1208" stroke="#ff4444" stroke-width="1"/>
+            <text x="206" y="118" font-size="8" fill="#ffa726" text-anchor="middle">IN</text>
+            <text x="206" y="128" font-size="9" fill="#ff4444" text-anchor="middle" font-weight="700">0</text>
+            <path d="M237 117 Q270 117 270 145" stroke="#ff4444" stroke-width="1.8" fill="none"/>
+            <rect x="175" y="148" width="62" height="34" rx="4" fill="#1a1208" stroke="#ff4444" stroke-width="1"/>
+            <text x="206" y="166" font-size="8" fill="#ffa726" text-anchor="middle">IN</text>
+            <text x="206" y="176" font-size="9" fill="#ff4444" text-anchor="middle" font-weight="700">0</text>
+            <path d="M237 165 Q270 165 270 157" stroke="#ff4444" stroke-width="1.8" fill="none"/>
+            <rect x="268" y="133" width="72" height="38" rx="4" fill="#111827" stroke="#2a3d5a" stroke-width="1.2"/>
+            <text x="304" y="157" font-size="9" fill="#6bacd4" text-anchor="middle" font-weight="700">XOR</text>
+            <path d="M340 152 Q370 152 370 152" stroke="#ff4444" stroke-width="1.8" fill="none"/>
+            <rect x="368" y="138" width="62" height="34" rx="4" fill="#1a1208" stroke="rgba(255,68,68,0.7)" stroke-width="1"/>
+            <text x="399" y="151" font-size="8" fill="#ef9a9a" text-anchor="middle">SUM</text>
+            <text x="399" y="163" font-size="9" fill="#ff4444" text-anchor="middle" font-weight="700">0</text>
+            <!-- minimap -->
+            <rect x="460" y="252" width="60" height="28" rx="3" fill="#080b10" stroke="rgba(0,212,170,0.25)" stroke-width="0.8"/>
+            <text x="490" y="270" font-size="7" fill="#3d4a5a" text-anchor="middle">minimap</text>
+            <!-- labels -->
+            <text x="160" y="290" font-size="9" fill="#3d4a5a">← Canvas (drag gates here)</text>
+            <!-- Right panel -->
+            <rect x="520" y="38" width="180" height="242" fill="#0f1218" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+            <text x="540" y="60" font-size="8" fill="#00d4aa" font-weight="700">⌨ Code</text>
+            <rect x="532" y="68" width="158" height="96" rx="4" fill="#090c10" stroke="rgba(255,255,255,0.07)" stroke-width="0.7"/>
+            <text x="540" y="84" font-size="7.5" fill="#3d4a5a">// Verilog</text>
+            <text x="540" y="96" font-size="7.5" fill="#40c4ff">module <tspan fill="#00d4aa">circuit</tspan></text>
+            <text x="540" y="108" font-size="7.5" fill="#64748b">  input a, b;</text>
+            <text x="540" y="120" font-size="7.5" fill="#64748b">  output sum;</text>
+            <text x="540" y="132" font-size="7.5" fill="#40c4ff">assign <tspan fill="#64748b">sum = a^b;</tspan></text>
+            <text x="540" y="158" font-size="8" fill="#64748b">Properties Panel</text>
+            <rect x="532" y="164" width="158" height="60" rx="4" fill="#161b24" stroke="rgba(255,255,255,0.07)" stroke-width="0.7"/>
+            <text x="540" y="178" font-size="7.5" fill="#64748b">Type: XOR</text>
+            <text x="540" y="190" font-size="7.5" fill="#64748b">ID: #3</text>
+            <text x="540" y="202" font-size="7.5" fill="#64748b">Inputs: 2</text>
+            <text x="540" y="214" font-size="7.5" fill="#64748b">Output: HIGH</text>
+            <!-- Labels -->
+            <text x="70" y="308" font-size="9" fill="#3d4a5a" text-anchor="middle">Left Panel</text>
+            <text x="330" y="308" font-size="9" fill="#3d4a5a" text-anchor="middle">Canvas</text>
+            <text x="610" y="308" font-size="9" fill="#3d4a5a" text-anchor="middle">Right Panel</text>
+            <!-- Bottom / waveform area -->
+            <rect x="140" y="280" width="380" height="40" fill="#080b10" stroke="rgba(0,212,170,0.2)" stroke-width="0.8"/>
+            <text x="155" y="305" font-size="8" fill="#00d4aa" font-weight="700">⏱ Waveform</text>
+            <line x1="260" y1="295" x2="280" y2="295" stroke="#00e676" stroke-width="1"/>
+            <line x1="280" y1="295" x2="280" y2="285" stroke="#00e676" stroke-width="1"/>
+            <line x1="280" y1="285" x2="300" y2="285" stroke="#00e676" stroke-width="1"/>
+            <line x1="300" y1="285" x2="300" y2="295" stroke="#00e676" stroke-width="1"/>
+            <line x1="300" y1="295" x2="320" y2="295" stroke="#00e676" stroke-width="1"/>
+            <text x="160" y="316" font-size="7.5" fill="#3d4a5a">Waveform panel (resizable)</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="steps" style="margin-top:20px;">
+        <div class="step">
+          <div class="step-num" style="background:rgba(255,167,38,0.1);border-color:rgba(255,167,38,0.25);color:var(--orange);">L</div>
+          <div class="step-body">
+            <div class="step-title">Left Panel — Gate Palette & Templates</div>
+            <div class="step-desc">Drag any gate onto the canvas. Sections: I/O (Input, Output, Clock, LED), Logic Gates (AND/OR/NOT…), Multi-Input (3 and 4-input), Flip-Flops, MSI Components, and Built-in Templates.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num" style="background:rgba(64,196,255,0.1);border-color:rgba(64,196,255,0.25);color:var(--blue);">C</div>
+          <div class="step-body">
+            <div class="step-title">Canvas — The simulation workspace</div>
+            <div class="step-desc">Pan with <kbd>Alt</kbd>+drag or middle-click drag. Zoom with the scroll wheel. Gates snap to a 10px grid. The minimap in the bottom-right shows a full overview of your circuit.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num" style="background:rgba(156,107,255,0.1);border-color:rgba(156,107,255,0.25);color:var(--purple);">R</div>
+          <div class="step-body">
+            <div class="step-title">Right Panel — Code, Validate & Truth Table</div>
+            <div class="step-desc">Three tabs: <strong style="color:var(--text)">Code</strong> (live export in 6 languages), <strong style="color:var(--text)">Validate</strong> (circuit checker), <strong style="color:var(--text)">Truth Table</strong> (auto-generated for up to 6 inputs). Drag the left edge to resize.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num" style="background:rgba(0,230,118,0.1);border-color:rgba(0,230,118,0.25);color:var(--green);">W</div>
+          <div class="step-body">
+            <div class="step-title">Waveform Panel — Timing diagram</div>
+            <div class="step-desc">Click <strong style="color:var(--text)">⏱ Waveform</strong> in the topbar to show/hide. Drag the top edge to resize it. Records signal history as you interact with the circuit or run the clock.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hdivider"></div>
+
+    <!-- ── 3. BUILDING ── -->
+    <div class="guide-section reveal" id="building">
+      <div class="sec-header">
+        <div class="sec-icon" style="background:rgba(255,167,38,0.1);border:1px solid rgba(255,167,38,0.2);">⚡</div>
+        <div>
+          <div class="sec-num">03 — CORE WORKFLOW</div>
+          <div class="sec-title">Building Circuits</div>
+        </div>
+      </div>
+
+      <div class="signal-legend">
+        <div class="sig-item"><div class="sig-dot hi"></div><span class="sig-label">HIGH (1) — green wire</span></div>
+        <div class="sig-item"><div class="sig-dot lo"></div><span class="sig-label">LOW (0) — red wire</span></div>
+        <div class="sig-item"><div class="sig-dot x"></div><span class="sig-label">Unconnected — grey pin</span></div>
+      </div>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">→</div>
+          <div class="step-body">
+            <div class="step-title">Placing gates</div>
+            <div class="step-desc">Drag from the left palette onto the canvas. You can also double-click a chip to place it at the centre. Every gate has small coloured circles on its edges — those are pins.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">→</div>
+          <div class="step-body">
+            <div class="step-title">Connecting pins</div>
+            <div class="step-desc">Click an <strong style="color:var(--green)">output pin</strong> (right side) to start a wire. Move to an <strong style="color:var(--blue)">input pin</strong> (left side) and click to complete it. Only one wire per input pin — rewiring auto-replaces the old connection.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">→</div>
+          <div class="step-body">
+            <div class="step-title">Toggling inputs</div>
+            <div class="step-desc">Click an <strong style="color:var(--orange)">INPUT</strong> gate body to toggle it between 0 and 1. You can also click the toggle button in the Properties panel on the right.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">→</div>
+          <div class="step-body">
+            <div class="step-title">Deleting gates and wires</div>
+            <div class="step-desc">Click a gate to select it (dashed teal outline), then press <kbd>Delete</kbd> or the <strong style="color:var(--red)">⌫ Delete</strong> button in the topbar. This removes the gate and all its connected wires.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">→</div>
+          <div class="step-body">
+            <div class="step-title">Labelling gates</div>
+            <div class="step-desc">Select an INPUT or OUTPUT gate and type a label in the Properties panel. Labels appear on the gate and in exported code (e.g. <code style="color:var(--accent);">input wire a</code> in Verilog).</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-card warn">
+        <span class="ic-icon">⚠</span>
+        <span>If a gate is highlighted in <strong>pink with a ↻ badge</strong>, it is part of a combinational loop. This means output feeds back into input without a flip-flop acting as a memory element. The simulator will still run but results may be unstable. Use a flip-flop to intentionally store state.</span>
+      </div>
+    </div>
+
+    <div class="hdivider"></div>
+
+    <!-- ── 4. GATE REFERENCE ── -->
+    <div class="guide-section reveal" id="gates">
+      <div class="sec-header">
+        <div class="sec-icon" style="background:rgba(0,212,170,0.1);border:1px solid rgba(0,212,170,0.2);">⬡</div>
+        <div>
+          <div class="sec-num">04 — REFERENCE</div>
+          <div class="sec-title">Gate Reference</div>
+        </div>
+      </div>
+
+      <table class="gate-table">
+        <thead>
+          <tr>
+            <th>Gate</th>
+            <th>Category</th>
+            <th>Inputs → Outputs</th>
+            <th>Behaviour</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="gate-name">INPUT</span></td><td><span class="gate-cat-badge cat-io">I/O</span></td><td>0 → 1</td><td>Toggle manually. Drives constant 0 or 1.</td></tr>
+          <tr><td><span class="gate-name">CLOCK</span></td><td><span class="gate-cat-badge cat-io">I/O</span></td><td>0 → 1</td><td>Oscillates at 500ms when ▶ Clock is running.</td></tr>
+          <tr><td><span class="gate-name">OUTPUT</span></td><td><span class="gate-cat-badge cat-io">I/O</span></td><td>1 → 0</td><td>Displays the value of its connected wire.</td></tr>
+          <tr><td><span class="gate-name">LED</span></td><td><span class="gate-cat-badge cat-io">I/O</span></td><td>1 → 0</td><td>Circle indicator. Glows green when HIGH.</td></tr>
+          <tr><td><span class="gate-name">BUFFER</span></td><td><span class="gate-cat-badge cat-basic">Basic</span></td><td>1 → 1</td><td>Passes input unchanged. Useful for fanout.</td></tr>
+          <tr><td><span class="gate-name">NOT</span></td><td><span class="gate-cat-badge cat-basic">Basic</span></td><td>1 → 1</td><td>Inverts input. Output = ¬A.</td></tr>
+          <tr><td><span class="gate-name">AND</span></td><td><span class="gate-cat-badge cat-basic">Basic</span></td><td>2 → 1</td><td>Output = 1 only when ALL inputs are 1.</td></tr>
+          <tr><td><span class="gate-name">OR</span></td><td><span class="gate-cat-badge cat-basic">Basic</span></td><td>2 → 1</td><td>Output = 1 when ANY input is 1.</td></tr>
+          <tr><td><span class="gate-name">NAND</span></td><td><span class="gate-cat-badge cat-basic">Basic</span></td><td>2 → 1</td><td>NOT AND. Output = 0 only when all inputs are 1.</td></tr>
+          <tr><td><span class="gate-name">NOR</span></td><td><span class="gate-cat-badge cat-basic">Basic</span></td><td>2 → 1</td><td>NOT OR. Output = 1 only when all inputs are 0.</td></tr>
+          <tr><td><span class="gate-name">XOR</span></td><td><span class="gate-cat-badge cat-basic">Basic</span></td><td>2 → 1</td><td>Output = 1 when inputs differ.</td></tr>
+          <tr><td><span class="gate-name">XNOR</span></td><td><span class="gate-cat-badge cat-basic">Basic</span></td><td>2 → 1</td><td>Output = 1 when inputs are equal.</td></tr>
+          <tr><td><span class="gate-name">AND3 / AND4</span></td><td><span class="gate-cat-badge cat-basic">Multi</span></td><td>3–4 → 1</td><td>AND with 3 or 4 inputs.</td></tr>
+          <tr><td><span class="gate-name">OR3 / OR4</span></td><td><span class="gate-cat-badge cat-basic">Multi</span></td><td>3–4 → 1</td><td>OR with 3 or 4 inputs.</td></tr>
+          <tr><td><span class="gate-name">MUX 2:1</span></td><td><span class="gate-cat-badge cat-msi">MSI</span></td><td>A, B, Sel → Y</td><td>Sel=0 → Y=A, Sel=1 → Y=B.</td></tr>
+          <tr><td><span class="gate-name">MUX 4:1</span></td><td><span class="gate-cat-badge cat-msi">MSI</span></td><td>D0–D3, S0, S1 → Y</td><td>S1:S0 selects which data input passes through.</td></tr>
+          <tr><td><span class="gate-name">DEMUX 1:2</span></td><td><span class="gate-cat-badge cat-msi">MSI</span></td><td>In, Sel → Y0, Y1</td><td>Routes input to selected output.</td></tr>
+          <tr><td><span class="gate-name">DEC 2:4</span></td><td><span class="gate-cat-badge cat-msi">MSI</span></td><td>A, B → Y0–Y3</td><td>Exactly one output is HIGH based on AB value.</td></tr>
+          <tr><td><span class="gate-name">DEC 3:8</span></td><td><span class="gate-cat-badge cat-msi">MSI</span></td><td>A, B, C → Y0–Y7</td><td>8-output decoder. One HIGH per combination.</td></tr>
+          <tr><td><span class="gate-name">ENC 4:2</span></td><td><span class="gate-cat-badge cat-msi">MSI</span></td><td>D0–D3 → A0, A1</td><td>Outputs binary index of highest active input.</td></tr>
+          <tr><td><span class="gate-name">PRIO 4:2</span></td><td><span class="gate-cat-badge cat-msi">MSI</span></td><td>D0–D3 → A0, A1, GS</td><td>Priority encoder. GS = 1 when any input is active.</td></tr>
+          <tr><td><span class="gate-name">HADD</span></td><td><span class="gate-cat-badge cat-msi">MSI</span></td><td>A, B → Sum, Carry</td><td>1-bit half adder. No carry-in.</td></tr>
+          <tr><td><span class="gate-name">FADD</span></td><td><span class="gate-cat-badge cat-msi">MSI</span></td><td>A, B, Cin → Sum, Cout</td><td>1-bit full adder. Chain for multi-bit addition.</td></tr>
+          <tr><td><span class="gate-name">COMP1</span></td><td><span class="gate-cat-badge cat-msi">MSI</span></td><td>A, B → &gt;, =, &lt;</td><td>1-bit magnitude comparator.</td></tr>
+          <tr><td><span class="gate-name">BIN2HEX</span></td><td><span class="gate-cat-badge cat-msi">MSI</span></td><td>B0–B3 → H0–H3</td><td>Passes bits through and displays hex value on gate body.</td></tr>
+          <tr><td><span class="gate-name">SR_FF</span></td><td><span class="gate-cat-badge cat-ff">FF</span></td><td>S, R → Q, Q̄</td><td>Set-Reset. S=R=1 is invalid state.</td></tr>
+          <tr><td><span class="gate-name">D_FF</span></td><td><span class="gate-cat-badge cat-ff">FF</span></td><td>D, CLK → Q, Q̄</td><td>Latches D on rising edge of CLK.</td></tr>
+          <tr><td><span class="gate-name">JK_FF</span></td><td><span class="gate-cat-badge cat-ff">FF</span></td><td>J, K, CLK → Q, Q̄</td><td>J=K=1 toggles output on rising edge.</td></tr>
+          <tr><td><span class="gate-name">T_FF</span></td><td><span class="gate-cat-badge cat-ff">FF</span></td><td>T, CLK → Q, Q̄</td><td>T=1 toggles on rising edge, T=0 holds.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="hdivider"></div>
+
+    <!-- ── 5. FLIP-FLOPS ── -->
+    <div class="guide-section reveal" id="flipflops">
+      <div class="sec-header">
+        <div class="sec-icon" style="background:rgba(156,107,255,0.1);border:1px solid rgba(156,107,255,0.2);">🔁</div>
+        <div>
+          <div class="sec-num">05 — SEQUENTIAL LOGIC</div>
+          <div class="sec-title">Flip-Flops</div>
+        </div>
+      </div>
+      <p style="font-family:var(--font-mono);font-size:13px;color:var(--muted);line-height:1.85;margin-bottom:20px;">
+        Flip-flops are edge-triggered memory elements. They only change state on the <strong style="color:var(--text)">rising edge</strong> of a clock signal (when CLK goes from 0 → 1). Connect a <strong style="color:var(--orange)">CLOCK</strong> gate to the CLK input and enable the ▶ Clock button.
+      </p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num" style="background:rgba(156,107,255,0.1);border-color:rgba(156,107,255,0.25);color:var(--purple);">D</div>
+          <div class="step-body">
+            <div class="step-title">D Flip-Flop — most common</div>
+            <div class="step-desc">Place a D_FF. Connect an INPUT to D and a CLOCK gate to CLK. Enable ▶ Clock. Every time CLK rises, Q captures the value of D. Connect Q to an OUTPUT to observe it. This is a 1-bit register.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num" style="background:rgba(156,107,255,0.1);border-color:rgba(156,107,255,0.25);color:var(--purple);">T</div>
+          <div class="step-body">
+            <div class="step-title">T Flip-Flop — frequency divider</div>
+            <div class="step-desc">Connect T=1 (a HIGH INPUT) and wire a CLOCK to CLK. Q will toggle every rising edge — dividing clock frequency by 2. Chain three T flip-flops to build a 3-bit binary counter.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num" style="background:rgba(156,107,255,0.1);border-color:rgba(156,107,255,0.25);color:var(--purple);">JK</div>
+          <div class="step-body">
+            <div class="step-title">JK Flip-Flop — most versatile</div>
+            <div class="step-desc">J=1 sets Q=1, K=1 resets Q=0, J=K=0 holds, J=K=1 toggles. This is a universal flip-flop — it can be configured to behave like SR, D, or T.</div>
+          </div>
+        </div>
+      </div>
+      <div class="info-card note">
+        <span class="ic-icon">ℹ</span>
+        <span>Flip-flop outputs (Q, Q̄) are <strong>not</strong> treated as combinational paths — the simulator won't flag them as loops. This means you can safely feed Q back into inputs without a pink warning badge.</span>
+      </div>
+    </div>
+
+    <div class="hdivider"></div>
+
+    <!-- ── 6. WAVEFORM ── -->
+    <div class="guide-section reveal" id="waveform">
+      <div class="sec-header">
+        <div class="sec-icon" style="background:rgba(0,230,118,0.1);border:1px solid rgba(0,230,118,0.2);">⏱</div>
+        <div>
+          <div class="sec-num">06 — TIMING ANALYSIS</div>
+          <div class="sec-title">Waveform Viewer</div>
+        </div>
+      </div>
+      <p style="font-family:var(--font-mono);font-size:13px;color:var(--muted);line-height:1.85;margin-bottom:20px;">
+        Click <strong style="color:var(--text)">⏱ Waveform</strong> in the topbar to open the timing diagram panel. It records every signal change automatically.
+      </p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">⏺</div>
+          <div class="step-body">
+            <div class="step-title">Recording</div>
+            <div class="step-desc">Click <strong style="color:var(--red)">⏺ Rec</strong> to pause/resume recording. Clear the history with <strong style="color:var(--text)">⌫ Clear</strong>. Use the Zoom slider to expand or compress the time axis.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">⬛</div>
+          <div class="step-body">
+            <div class="step-title">Step Mode</div>
+            <div class="step-desc">Enable <strong style="color:var(--orange)">⬛ Step</strong> mode to manually advance one simulation tick at a time using the <strong style="color:var(--orange)">▶ +1</strong> button. Ideal for debugging sequential logic one clock edge at a time.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">⊞</div>
+          <div class="step-body">
+            <div class="step-title">Bus Grouping</div>
+            <div class="step-desc">Select multiple signals (shift-click their labels) and click <strong style="color:var(--blue)">⊞ Bus</strong> to group them into a single hexadecimal bus row. The bus displays its combined value as <code style="color:var(--blue)">0xN</code>.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">⚡</div>
+          <div class="step-body">
+            <div class="step-title">Pattern Generator</div>
+            <div class="step-desc">Click <strong style="color:var(--purple)">⚡ Pattern</strong> to open the pattern generator. Enter sequences like <code style="color:var(--accent)">0,1,0,1,1,0</code> for each input and set an interval in ms. The generator feeds inputs automatically, recording the full waveform.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hdivider"></div>
+
+    <!-- ── 7. CODE EXPORT ── -->
+    <div class="guide-section reveal" id="export">
+      <div class="sec-header">
+        <div class="sec-icon" style="background:rgba(64,196,255,0.1);border:1px solid rgba(64,196,255,0.2);">📟</div>
+        <div>
+          <div class="sec-num">07 — CODE GENERATION</div>
+          <div class="sec-title">Code Export</div>
+        </div>
+      </div>
+      <p style="font-family:var(--font-mono);font-size:13px;color:var(--muted);line-height:1.85;margin-bottom:20px;">
+        The right panel's <strong style="color:var(--text)">Code</strong> tab live-syncs with your circuit. Switch languages using the tabs at the top.
+      </p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">→</div>
+          <div class="step-body">
+            <div class="step-title">Label your inputs and outputs first</div>
+            <div class="step-desc">Select each INPUT and OUTPUT gate and give it a label (A, B, Cin, Sum, Carry…) in the Properties panel. Labels become port names in generated code. Unlabelled gates default to <code style="color:var(--accent)">in1</code>, <code style="color:var(--accent)">out1</code>, etc.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">→</div>
+          <div class="step-body">
+            <div class="step-title">Copy the code</div>
+            <div class="step-desc">Click <strong style="color:var(--text)">⎘ Copy</strong> to copy the current language to your clipboard. The JSON tab also has an <strong style="color:var(--accent)">▶ Apply</strong> button — paste edited JSON and click Apply to load it back into the canvas.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">→</div>
+          <div class="step-body">
+            <div class="step-title">Export as image or PDF</div>
+            <div class="step-desc">Click <strong style="color:var(--text)">📤 Export</strong> in the topbar to export as PNG (2× resolution with embedded truth table), SVG vector, or PDF with metadata header.</div>
+          </div>
+        </div>
+      </div>
+      <div class="info-card tip">
+        <span class="ic-icon">💡</span>
+        <span>The <strong>JSON</strong> format is the native save format — you can share circuit files with others by exporting JSON and having them import it with the <strong>Import JSON</strong> button.</span>
+      </div>
+    </div>
+
+    <div class="hdivider"></div>
+
+    <!-- ── 8. SAVING ── -->
+    <div class="guide-section reveal" id="save">
+      <div class="sec-header">
+        <div class="sec-icon" style="background:rgba(255,167,38,0.1);border:1px solid rgba(255,167,38,0.2);">💾</div>
+        <div>
+          <div class="sec-num">08 — PERSISTENCE</div>
+          <div class="sec-title">Saving Circuits</div>
+        </div>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <div class="step-title">Named saves (requires login)</div>
+            <div class="step-desc">Click <strong style="color:var(--accent)">💾 Save Circuit</strong>. Enter a name and optional description. Saves are stored per-user in <code style="color:var(--accent)">localStorage</code> so they persist between sessions on the same device.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <div class="step-title">Loading saves</div>
+            <div class="step-desc">Click <strong style="color:var(--text)">📂 My Circuits</strong>. Each saved circuit shows its gate count, wire count, and save date. Click <strong style="color:var(--green)">Load</strong> to open it — you'll be asked to confirm if the canvas has unsaved changes.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <div class="step-title">User templates</div>
+            <div class="step-desc">In the left panel, click <strong style="color:var(--text)">+ Save</strong> under "My Templates" to save the current circuit as a reusable template. These appear in your panel alongside built-in templates.</div>
+          </div>
+        </div>
+      </div>
+      <div class="info-card warn">
+        <span class="ic-icon">⚠</span>
+        <span>All data is stored in your browser's <strong>localStorage</strong>. Clearing browser data or using a private/incognito window will lose your saves. Use <strong>Export JSON</strong> to keep permanent backups.</span>
+      </div>
+    </div>
+
+    <div class="hdivider"></div>
+
+    <!-- ── 9. SHORTCUTS ── -->
+    <div class="guide-section reveal" id="shortcuts">
+      <div class="sec-header">
+        <div class="sec-icon" style="background:rgba(64,196,255,0.1);border:1px solid rgba(64,196,255,0.2);">⌨</div>
+        <div>
+          <div class="sec-num">09 — REFERENCE</div>
+          <div class="sec-title">Keyboard Shortcuts</div>
+        </div>
+      </div>
+      <div class="shortcut-grid">
+        <div class="shortcut-row"><span class="shortcut-desc">Undo</span><div class="kbd-group"><kbd>Ctrl</kbd><span class="kbd-plus">+</span><kbd>Z</kbd></div></div>
+        <div class="shortcut-row"><span class="shortcut-desc">Redo</span><div class="kbd-group"><kbd>Ctrl</kbd><span class="kbd-plus">+</span><kbd>Y</kbd></div></div>
+        <div class="shortcut-row"><span class="shortcut-desc">Delete selected gate</span><div class="kbd-group"><kbd>Delete</kbd></div></div>
+        <div class="shortcut-row"><span class="shortcut-desc">Cancel wire</span><div class="kbd-group"><kbd>Esc</kbd></div></div>
+        <div class="shortcut-row"><span class="shortcut-desc">Apply JSON (code panel)</span><div class="kbd-group"><kbd>Ctrl</kbd><span class="kbd-plus">+</span><kbd>Enter</kbd></div></div>
+        <div class="shortcut-row"><span class="shortcut-desc">Pan canvas</span><div class="kbd-group"><kbd>Alt</kbd><span class="kbd-plus">+</span>Drag</div></div>
+        <div class="shortcut-row"><span class="shortcut-desc">Zoom in / out</span><div class="kbd-group">Scroll wheel</div></div>
+        <div class="shortcut-row"><span class="shortcut-desc">Toggle input value</span><div class="kbd-group">Click input gate</div></div>
+        <div class="shortcut-row"><span class="shortcut-desc">Start wire</span><div class="kbd-group">Click output pin</div></div>
+        <div class="shortcut-row"><span class="shortcut-desc">Fit view</span><div class="kbd-group">⊡ Fit button</div></div>
+      </div>
+    </div>
+
+    <div class="hdivider"></div>
+
+    <!-- ── 10. TROUBLESHOOTING ── -->
+    <div class="guide-section reveal" id="troubleshooting">
+      <div class="sec-header">
+        <div class="sec-icon" style="background:rgba(255,82,82,0.1);border:1px solid rgba(255,82,82,0.2);">🔧</div>
+        <div>
+          <div class="sec-num">10 — FAQ</div>
+          <div class="sec-title">Troubleshooting</div>
+        </div>
+      </div>
+
+      <div class="faq-list">
+
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-q">
+            <div class="faq-q-text"><span class="faq-tag tag-bug">BUG</span>My gate is glowing pink with a ↻ badge. What does that mean?</div>
+            <span class="faq-arrow">›</span>
+          </div>
+          <div class="faq-a"><div class="faq-a-inner">
+            Your circuit has a <strong>combinational loop</strong> — a gate's output is connected back to its own input (directly or through other gates) without a flip-flop breaking the cycle. The simulator detects this using Kahn's topological sort algorithm and highlights the loop in pink.<br><br>
+            <strong>Fix:</strong> If you intentionally want feedback (e.g. an SR latch), replace the gate loop with a proper <strong>SR_FF</strong> or <strong>D_FF</strong> flip-flop. If it's unintentional, trace the pink-highlighted gates and remove the backward connection.
+          </div></div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-q">
+            <div class="faq-q-text"><span class="faq-tag tag-bug">BUG</span>My wires are all red even though I set inputs to HIGH.</div>
+            <span class="faq-arrow">›</span>
+          </div>
+          <div class="faq-a"><div class="faq-a-inner">
+            This usually means the wires aren't actually connected. A common mistake is releasing a wire slightly off-target of the input pin. <br><br>
+            <strong>Check:</strong> Hover over the pin — a crosshair cursor means it's a valid target. Try deleting the wire (select its destination gate and use <kbd>Delete</kbd>, then re-draw the connection). Also make sure you started the wire from an <strong>output pin</strong> (right side), not an input pin.
+          </div></div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-q">
+            <div class="faq-q-text"><span class="faq-tag tag-bug">BUG</span>The flip-flop Q output never changes when I toggle inputs.</div>
+            <span class="faq-arrow">›</span>
+          </div>
+          <div class="faq-a"><div class="faq-a-inner">
+            Flip-flops are <strong>edge-triggered</strong> — they only sample input on the rising edge of the clock (when CLK goes 0 → 1). <br><br>
+            <strong>Steps to fix:</strong><br>
+            1. Make sure you have a <strong>CLOCK</strong> gate (not an INPUT) connected to the CLK pin.<br>
+            2. Click <strong>▶ Clock</strong> in the topbar to start the clock oscillator.<br>
+            3. Now toggle your inputs — Q will update on the next rising clock edge.<br><br>
+            If you're not using the clock, manually click the CLOCK gate to toggle it 0→1→0, which creates one manual rising edge.
+          </div></div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-q">
+            <div class="faq-q-text"><span class="faq-tag tag-how">HOW</span>How do I delete just a wire without deleting the gate?</div>
+            <span class="faq-arrow">›</span>
+          </div>
+          <div class="faq-a"><div class="faq-a-inner">
+            You can't click wires directly to select them (wires are not independently selectable in the current version). <br><br>
+            <strong>Workaround:</strong> Simply draw a new wire to the same input pin — it will automatically replace the existing connection. This is the fastest way to rewire a pin.<br><br>
+            Alternatively, if you want to disconnect a pin entirely, you can delete the destination gate and re-place it (use Undo after if needed).
+          </div></div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-q">
+            <div class="faq-q-text"><span class="faq-tag tag-how">HOW</span>How do I connect one output to multiple inputs (fanout)?</div>
+            <span class="faq-arrow">›</span>
+          </div>
+          <div class="faq-a"><div class="faq-a-inner">
+            Simply draw multiple wires from the same output pin. Click the output pin once to start the first wire, complete it, then click the same output pin again for the second wire. There is no limit on fanout — one output can drive as many inputs as you like.<br><br>
+            If signal integrity is a concern in a real design, insert a <strong>BUFFER</strong> gate to represent the driver.
+          </div></div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-q">
+            <div class="faq-q-text"><span class="faq-tag tag-how">HOW</span>The truth table isn't showing up in the right panel.</div>
+            <span class="faq-arrow">›</span>
+          </div>
+          <div class="faq-a"><div class="faq-a-inner">
+            The <strong>circuit truth table</strong> requires:<br>
+            • At least one <strong>INPUT</strong> gate (not CLOCK)<br>
+            • At least one <strong>OUTPUT</strong> or <strong>LED</strong> gate<br>
+            • No more than <strong>6 INPUT gates</strong> (2⁶ = 64 rows; more would be too slow)<br><br>
+            Switch to the <strong>Truth Table</strong> tab in the right panel and click <strong>▶ Run</strong> to generate it. If you select a single gate on the canvas, the <strong>gate truth table</strong> (for that gate type only) appears at the bottom of the Properties panel.
+          </div></div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-q">
+            <div class="faq-q-text"><span class="faq-tag tag-data">DATA</span>My saved circuits disappeared after closing the browser.</div>
+            <span class="faq-arrow">›</span>
+          </div>
+          <div class="faq-a"><div class="faq-a-inner">
+            Saves are stored in <strong>localStorage</strong>, which is tied to the exact browser + origin (file path or domain). Saves can be lost if:<br>
+            • You used a <strong>private/incognito window</strong><br>
+            • You <strong>cleared browser data</strong> or site data<br>
+            • You moved the files to a different folder (changing the origin)<br>
+            • You opened the files in a different browser<br><br>
+            <strong>Prevention:</strong> Always export important circuits with <strong>Export JSON</strong> as a backup file on your disk. You can re-import them at any time with <strong>Import JSON</strong>.
+          </div></div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-q">
+            <div class="faq-q-text"><span class="faq-tag tag-data">DATA</span>I registered an account but my login doesn't work.</div>
+            <span class="faq-arrow">›</span>
+          </div>
+          <div class="faq-a"><div class="faq-a-inner">
+            Accounts are stored locally in <strong>localStorage</strong> — they're not cloud-based. This means your account only exists in the browser where you registered it.<br><br>
+            <strong>Common causes:</strong><br>
+            • You're using a different browser than where you registered<br>
+            • Browser data was cleared<br>
+            • You typed the wrong password (passwords are stored as SHA-256 hashes, so there's no recovery)<br><br>
+            <strong>Fix:</strong> Register a new account or use <strong>Continue as Guest</strong>. All circuit features work in guest mode.
+          </div></div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-q">
+            <div class="faq-q-text"><span class="faq-tag tag-perf">PERF</span>The canvas feels slow with many gates.</div>
+            <span class="faq-arrow">›</span>
+          </div>
+          <div class="faq-a"><div class="faq-a-inner">
+            The canvas redraws fully on every simulation tick. Performance degrades with very large circuits (50+ gates) because each frame redraws all gates, wires, and pins.<br><br>
+            <strong>Tips to improve performance:</strong><br>
+            • Stop the clock when not needed (▶ Clock toggles it off)<br>
+            • Close the Waveform panel when not in use<br>
+            • Use MSI components (HADD, FADD, DEC2, MUX2) instead of building them from individual gates — one MSI component replaces many gates at a fraction of the render cost<br>
+            • Use a Chromium-based browser (Chrome/Edge) for best Canvas 2D performance
+          </div></div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-q">
+            <div class="faq-q-text"><span class="faq-tag tag-how">HOW</span>How do I export a clean image for my report or assignment?</div>
+            <span class="faq-arrow">›</span>
+          </div>
+          <div class="faq-a"><div class="faq-a-inner">
+            Click <strong>📤 Export</strong> in the topbar. You have three options:<br><br>
+            • <strong>PNG</strong> — 2× resolution raster image with a dark background, dot grid, and the circuit truth table embedded in the bottom-right corner. Best for documents and slides.<br>
+            • <strong>SVG</strong> — Scalable vector graphic. Open in Illustrator, Inkscape, or embed in HTML. Scales to any size without pixelation.<br>
+            • <strong>PDF</strong> — Print-ready PDF with a header bar (circuit name + date) and a footer showing gate and wire counts. Uses jsPDF loaded from CDN — requires an internet connection on first use.
+          </div></div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-q">
+            <div class="faq-q-text"><span class="faq-tag tag-bug">BUG</span>The Validate tab shows errors on gates I know are correct.</div>
+            <span class="faq-arrow">›</span>
+          </div>
+          <div class="faq-a"><div class="faq-a-inner">
+            The validator checks for specific rules like unconnected input pins, floating output gates (OUTPUT with nothing wired to it), and invalid flip-flop states. Some common false positives:<br><br>
+            • <strong>Orange ⚠ badge</strong> — warning, not an error. The circuit still simulates. For example, an unconnected input pin defaults to 0, which may be intentional.<br>
+            • <strong>Red ✖ badge</strong> — actual error that may prevent correct simulation. Check the Validate panel for details.<br><br>
+            Gates with no connections are flagged because they produce no useful output. You can safely ignore warnings on gates you're still wiring up.
+          </div></div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-q">
+            <div class="faq-q-text"><span class="faq-tag tag-how">HOW</span>Can I use Gateonix offline?</div>
+            <span class="faq-arrow">›</span>
+          </div>
+          <div class="faq-a"><div class="faq-a-inner">
+            Yes — almost entirely. All core functionality works offline:<br>
+            • Building, simulating, saving, loading circuits<br>
+            • All code exports (JSON, Python, C, C++, Verilog, VHDL)<br>
+            • PNG and SVG export<br><br>
+            The only feature that needs internet:<br>
+            • <strong>PDF export</strong> — loads jsPDF from a CDN on first use. After it's cached by the browser, subsequent PDF exports work offline.<br>
+            • <strong>Google Fonts</strong> — JetBrains Mono and Syne load from Google Fonts. Without internet, the browser falls back to a system monospace/sans font. The app remains fully functional.
+          </div></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Bottom CTA -->
+    <div class="reveal" style="text-align:center;padding:40px 0 20px;">
+      <p style="font-family:var(--font-mono);font-size:13px;color:var(--muted);margin-bottom:24px;">Still stuck? Try loading a built-in template to see a working example.</p>
+      <a href="login.html" style="font-family:var(--font-ui);font-weight:700;font-size:14px;color:#050e0b;background:var(--accent);border:none;padding:13px 32px;border-radius:8px;text-decoration:none;transition:all 0.15s;">
+        Open Simulator →
+      </a>
+    </div>
+
+  </main>
+</div>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-logo">Logic<span>Forge</span></div>
+  <div class="footer-links">
+    <a href="index.html">Simulator</a>
+    <a href="about.html">About</a>
+    <a href="guide.html">Guide</a>
+    <a href="login.html">Login</a>
+  </div>
+  <div class="footer-copy">Built with vanilla JS · No frameworks · No servers</div>
+</footer>
+
+<script>
+  // ── FAQ accordion ────────────────────────────────────────────
+  function toggleFaq(item) {
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+    if (!isOpen) item.classList.add('open');
+  }
+
+  // ── Scroll reveal ────────────────────────────────────────────
+  const revealObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); revealObs.unobserve(e.target); }
+    });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+
+  // ── Active sidebar link + reading progress ───────────────────
+  const sections = document.querySelectorAll('.guide-section');
+  const sbLinks  = document.querySelectorAll('.sb-link[data-section]');
+  const progressFill  = document.getElementById('progress-fill');
+  const progressLabel = document.getElementById('progress-label');
+
+  function updateSidebar() {
+    // Progress
+    const scrollTop = window.scrollY;
+    const docH = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = docH > 0 ? Math.round((scrollTop / docH) * 100) : 0;
+    if (progressFill) progressFill.style.width = pct + '%';
+    if (progressLabel) progressLabel.textContent = pct + '% read';
+
+    // Active section
+    let current = '';
+    sections.forEach(sec => {
+      const top = sec.getBoundingClientRect().top;
+      if (top < 140) current = sec.id;
+    });
+    sbLinks.forEach(link => {
+      link.classList.toggle('active', link.dataset.section === current);
+    });
+  }
+
+  window.addEventListener('scroll', updateSidebar, { passive: true });
+  updateSidebar();
+</script>
+</body>
+</html>

@@ -148,7 +148,7 @@
   <a href="login.html" class="sn-cta">Launch App →</a>
 </nav>
 
-<div id="app">
+<main id="app">
 
   <!-- TOP BAR -->
   <header id="topbar">
@@ -157,12 +157,12 @@
       <span class="cs-label">CIRCUIT</span>
     </div>
     <div class="tb-group">
-      <button class="tb-btn" id="btn-new">New</button>
-      <button class="tb-btn accent" id="btn-save-named">💾 Save Circuit</button>
-      <button class="tb-btn" id="btn-open-saved">📂 My Circuits</button>
-      <button class="tb-btn" id="btn-export">Export JSON</button>
-      <button class="tb-btn" id="btn-export-img">📤 Export</button>
-      <button class="tb-btn" id="btn-import">Import JSON</button>
+      <button class="tb-btn" id="btn-new" aria-label="New Circuit">New</button>
+      <button class="tb-btn accent" id="btn-save-named" aria-label="Save Circuit">💾 Save Circuit</button>
+      <button class="tb-btn" id="btn-open-saved" aria-label="Open Saved Circuits">📂 My Circuits</button>
+      <button class="tb-btn" id="btn-export" aria-label="Export JSON">Export JSON</button>
+      <button class="tb-btn" id="btn-export-img" aria-label="Export Image">📤 Export</button>
+      <button class="tb-btn" id="btn-import" aria-label="Import JSON">Import JSON</button>
     </div>
     <div class="tb-group">
       <button class="tb-btn" id="btn-undo">↩ Undo</button>
@@ -179,11 +179,11 @@
       <a href="kmap.html" class="tb-btn" id="btn-kmap" title="Open Karnaugh Map Solver" style="text-decoration:none;display:inline-flex;align-items:center;gap:5px;">🗺 K-Map</a>
     </div>
     <div class="tb-right">
-      <span id="status-msg" style="display:none"></span>
+      <span id="status-msg" style="display:none" aria-live="polite"></span>
       <span id="clock-badge" class="clk-off">CLK ●</span>
       <!-- BB-8 Theme Toggle -->
       <label class="bb8-toggle" title="Switch dark / light theme">
-        <input class="bb8-toggle__checkbox" type="checkbox" id="theme-toggle">
+        <input class="bb8-toggle__checkbox" type="checkbox" id="theme-toggle" aria-label="Toggle dark theme">
         <div class="bb8-toggle__container">
           <div class="bb8-toggle__scenery">
             <div class="bb8-toggle__star"></div><div class="bb8-toggle__star"></div>
@@ -206,7 +206,7 @@
       </label>
       <div class="user-pill">
         <span id="user-name">Guest</span>
-        <button id="btn-logout">⏻</button>
+        <button id="btn-logout" aria-label="Logout">⏻</button>
       </div>
     </div>
   </header>
@@ -356,12 +356,12 @@
 
     <!-- CENTER: Canvas -->
     <div id="canvas-area">
-      <canvas id="main-canvas"></canvas>
+      <canvas id="main-canvas" aria-label="Logic circuit drawing area"></canvas>
       <div id="zoom-bar">
-        <button id="z-in">+</button>
+        <button id="z-in" aria-label="Zoom in">+</button>
         <span id="z-label">100%</span>
-        <button id="z-out">−</button>
-        <button id="z-fit">⊡ Fit</button>
+        <button id="z-out" aria-label="Zoom out">−</button>
+        <button id="z-fit" aria-label="Fit to screen">⊡ Fit</button>
       </div>
       <div id="minimap-box">
         <canvas id="mini-canvas"></canvas>
@@ -391,7 +391,7 @@
       <!-- Editor area -->
       <div id="cp-editor-wrap">
         <div id="cp-line-nums"></div>
-        <textarea id="cp-editor" spellcheck="false" autocorrect="off" autocomplete="off" autocapitalize="off"></textarea>
+        <textarea id="cp-editor" spellcheck="false" autocorrect="off" autocomplete="off" autocapitalize="off" aria-label="Code Editor"></textarea>
       </div>
 
       <!-- Action bar -->
@@ -411,15 +411,15 @@
     </aside>
 
   </div>
-</div>
+</main>
 
 <!-- ===== MODALS ===== -->
 <div class="modal-overlay" id="modal-save">
   <div class="modal">
     <div class="modal-title">💾 Save Circuit</div>
     <div class="modal-body">
-      <div class="field"><label>Circuit Name</label><input type="text" id="save-name" placeholder="e.g. Half Adder, My ALU..." maxlength="60"/></div>
-      <div class="field"><label>Description (optional)</label><input type="text" id="save-desc" placeholder="Brief description..." maxlength="120"/></div>
+      <div class="field"><label for="save-name">Circuit Name</label><input type="text" id="save-name" placeholder="e.g. Half Adder, My ALU..." maxlength="60"/></div>
+      <div class="field"><label for="save-desc">Description (optional)</label><input type="text" id="save-desc" placeholder="Brief description..." maxlength="120"/></div>
     </div>
     <div class="modal-footer">
       <button class="mb-cancel" id="save-cancel">Cancel</button>
@@ -454,7 +454,7 @@
   </defs>
 </svg>
 
-<input type="file" id="file-input" accept=".json" style="display:none"/>
+<input type="file" id="file-input" accept=".json" style="display:none" aria-label="Upload JSON file"/>
 
 <script src="gates.js"></script>
 <script src="canvas.js"></script>

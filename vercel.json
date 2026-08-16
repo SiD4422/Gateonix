@@ -1,5 +1,14 @@
 {
   "cleanUrls": true,
+  "redirects": [
+    { "source": "/ABOUT", "destination": "/about", "permanent": true },
+    { "source": "/ABOUT.html", "destination": "/about", "permanent": true },
+    { "source": "/Devloper", "destination": "/developer", "permanent": true },
+    { "source": "/Devloper.html", "destination": "/developer", "permanent": true },
+    { "source": "/Feedback", "destination": "/feedback", "permanent": true },
+    { "source": "/Feedback.html", "destination": "/feedback", "permanent": true },
+    { "source": "/devloper", "destination": "/developer", "permanent": true }
+  ],
   "headers": [
     {
       "source": "/(.*)",

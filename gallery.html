@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Circuit Gallery — Digital Logic Examples | Gateonix</title>
+  <meta name="description" content="Browse 15 pre-built digital logic circuits including adders, multiplexers, decoders, flip-flops, counters, and shift registers. Open any circuit directly in the Gateonix simulator.">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #080a0e;
+      --panel: #0f1218;
+      --surface: #161b24;
+      --raised: #1e2535;
+      --accent: #00d4aa;
+      --accent-hover: #00f5c4;
+      --text-main: #ffffff;
+      --text-muted: #a0a8b5;
+      --border: rgba(255, 255, 255, 0.05);
+      --font-body: 'Syne', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background-color: var(--bg);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Navigation */
+    nav {
+      background-color: var(--panel);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-brand {
+      font-family: var(--font-mono);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-main);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .nav-brand span {
+      color: var(--accent);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--text-main);
+    }
+
+    .nav-links a.active {
+      color: var(--accent);
+    }
+
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      padding: 4rem 2rem 2rem;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .hero h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      background: linear-gradient(to right, var(--text-main), var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+    }
+
+    /* Filter Bar */
+    .filters {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      padding: 2rem;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .filter-btn {
+      background-color: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 0.5rem 1rem;
+      border-radius: 2rem;
+      cursor: pointer;
+      font-family: var(--font-body);
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .filter-btn:hover {
+      background-color: var(--raised);
+      color: var(--text-main);
+    }
+
+    .filter-btn.active {
+      background-color: var(--accent);
+      color: var(--bg);
+      border-color: var(--accent);
+    }
+
+    /* Gallery Grid */
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      flex: 1;
+    }
+
+    @media (max-width: 992px) {
+      .gallery {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .gallery {
+        grid-template-columns: 1fr;
+      }
+      .nav-links {
+        display: none; /* simple mobile nav approach */
+      }
+    }
+
+    /* Card */
+    .card {
+      background-color: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(0, 212, 170, 0.1);
+      border-color: rgba(0, 212, 170, 0.3);
+    }
+
+    .card-icon {
+      height: 120px;
+      background-color: var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 1px solid var(--border);
+      color: var(--accent);
+      opacity: 0.8;
+      transition: opacity 0.3s;
+    }
+
+    .card:hover .card-icon {
+      opacity: 1;
+    }
+
+    .card-content {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .card-badge {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    /* Badge Colors */
+    .badge-arithmetic { background-color: rgba(255, 99, 132, 0.1); color: #ff6384; }
+    .badge-msi { background-color: rgba(54, 162, 235, 0.1); color: #36a2eb; }
+    .badge-sequential { background-color: rgba(255, 206, 86, 0.1); color: #ffce56; }
+    .badge-universal { background-color: rgba(153, 102, 255, 0.1); color: #9966ff; }
+    .badge-display { background-color: rgba(75, 192, 192, 0.1); color: #4bc0c0; }
+
+    .card-desc {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 1.5rem;
+      flex: 1;
+    }
+
+    .card-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 0.75rem;
+      background-color: var(--surface);
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+
+    .card:hover .card-btn {
+      background-color: var(--accent);
+      color: var(--bg);
+    }
+
+    /* Footer CTA */
+    .cta {
+      text-align: center;
+      padding: 4rem 2rem;
+      margin-top: auto;
+    }
+
+    .cta a {
+      color: var(--text-main);
+      text-decoration: none;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border-bottom: 2px solid var(--accent);
+      padding-bottom: 2px;
+      transition: color 0.2s;
+    }
+
+    .cta a:hover {
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav>
+    <a href="/" class="nav-brand"><span>&lt;</span>Gateonix<span>/&gt;</span></a>
+    <div class="nav-links">
+      <a href="/">Simulator</a>
+      <a href="/about">About</a>
+      <a href="/learn">Learn</a>
+      <a href="/gallery" class="active">Gallery</a>
+      <a href="/help">Help</a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <h1>Circuit Gallery</h1>
+    <p>Explore and learn from pre-built digital logic circuits. Click any card to open it directly in the simulator.</p>
+  </section>
+
+  <!-- Filters -->
+  <div class="filters">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="arithmetic">Arithmetic</button>
+    <button class="filter-btn" data-filter="msi">MSI</button>
+    <button class="filter-btn" data-filter="sequential">Sequential</button>
+    <button class="filter-btn" data-filter="universal">Universal Gates</button>
+    <button class="filter-btn" data-filter="display">Display</button>
+  </div>
+
+  <!-- Gallery -->
+  <div class="gallery" id="gallery">
+    <!-- Cards will be populated here -->
+  </div>
+
+  <!-- Bottom CTA -->
+  <div class="cta">
+    <a href="/">Don't see what you need? Build your own from scratch &rarr;</a>
+  </div>
+
+  <script>
+    const circuits = [
+      {
+        id: 'halfadder',
+        name: 'Half Adder',
+        category: 'Arithmetic',
+        catClass: 'arithmetic',
+        desc: 'Adds two 1-bit numbers. Outputs Sum and Carry. Foundation of all digital arithmetic.',
+        icon: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16M8 6v12M16 6v12"/></svg>'
+      },
+      {
+        id: 'fulladder',
+        name: 'Full Adder',
+        category: 'Arithmetic',
+        catClass: 'arithmetic',
+        desc: 'Adds three 1-bit inputs including carry-in. The building block of multi-bit adders.',
+        icon: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>'
+      },
+      {
+        id: 'mux',
+        name: '2:1 Multiplexer',
+        category: 'MSI',
+        catClass: 'msi',
+        desc: 'Selects one of two data inputs based on a select line. Essential for data routing.',
+        icon: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="4 4 20 8 20 16 4 20 4 4"/></svg>'
+      },
+      {
+        id: 'decoder',
+        name: '2-to-4 Decoder',
+        category: 'MSI',
+        catClass: 'msi',
+        desc: 'Decodes a 2-bit binary input into 4 individual output lines.',
+        icon: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="20 4 4 8 4 16 20 20 20 4"/></svg>'
+      },
+      {
+        id: 'mux2',
+        name: 'MUX 2:1 (IC)',
+        category: 'MSI',
+        catClass: 'msi',
+        desc: 'Full IC-style 2:1 MUX with enable.',
+        icon: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><path d="M8 4v16M16 4v16"/></svg>'
+      },
+      {
+        id: 'dec2ic',
+        name: 'DEC 2:4 (IC)',
+        category: 'MSI',
+        catClass: 'msi',
+        desc: 'Full IC-style 2-to-4 decoder.',
+        icon: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><path d="M4 8h16M4 16h16"/></svg>'
+      },
+      {
+        id: 'dec3ic',
+        name: 'DEC 3:8 (IC)',
+        category: 'MSI',
+        catClass: 'msi',
+        desc: '3-to-8 decoder with 8 individual active-low outputs.',
+        icon: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><path d="M4 12h16M12 4v16"/></svg>'
+      },
+      {
+        id: 'bin2hex',
+        name: 'Bin→Hex Display',
+        category: 'Display',
+        catClass: 'display',
+        desc: 'Converts 4-bit binary input to hexadecimal digit display.',
+        icon: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><path d="M8 6h8M8 12h8M8 18h8"/></svg>'
+      },
+      {
+        id: 'comparator',
+        name: '1-bit Comparator',
+        category: 'Arithmetic',
+        catClass: 'arithmetic',
+        desc: 'Compares two 1-bit values. Outputs A>B, A=B, A<B.',
+        icon: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M12 4l8 8-8 8"/></svg>'
+      },
+      {
+        id: 'enc4ic',
+        name: 'Priority Encoder',
+        category: 'MSI',
+        catClass: 'msi',
+        desc: 'Encodes the highest-priority active input to a 2-bit binary output.',
+        icon: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><circle cx="12" cy="12" r="3"/></svg>'
+      },
+      {
+        id: 'counter2bit',
+        name: '2-bit Sync Counter',
+        category: 'Sequential',
+        catClass: 'sequential',
+        desc: 'Synchronous 2-bit binary counter using D flip-flops with a shared clock.',
+        icon: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16M4 12h16M8 8l8 8M16 8l-8 8"/></svg>'
+      },
+      {
+        id: 'async2bitcounter',
+        name: '2-bit Async Counter',
+        category: 'Sequential',
+        catClass: 'sequential',
+        desc: 'Ripple counter where each flip-flop clocks the next. Simpler but less precise than synchronous.',
+        icon: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 8 8 12 12 16 8 20 12"/></svg>'
+      },
+      {
+        id: 'shift4',
+        name: '4-bit Shift Register',
+        category: 'Sequential',
+        catClass: 'sequential',
+        desc: 'Shifts data one bit per clock cycle. Used in serial communications and data storage.',
+        icon: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M16 8l4 4-4 4M4 8v8"/></svg>'
+      },
+      {
+        id: 'and_nand',
+        name: 'AND using NAND',
+        category: 'Universal Gates',
+        catClass: 'universal',
+        desc: 'Demonstrates how NAND gates alone can implement any Boolean function.',
+        icon: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h8a8 8 0 0 1 8 8 8 8 0 0 1-8 8H4V4z"/><circle cx="21" cy="12" r="1"/></svg>'
+      },
+      {
+        id: 'xor_nand',
+        name: 'XOR using NAND',
+        category: 'Universal Gates',
+        catClass: 'universal',
+        desc: 'Shows the 4-NAND implementation of XOR — the most common universal gate example.',
+        icon: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h8a8 8 0 0 1 8 8 8 8 0 0 1-8 8H4V4z"/><path d="M2 4c2.5 0 5 3.5 5 8s-2.5 8-5 8"/></svg>'
+      }
+    ];
+
+    const gallery = document.getElementById('gallery');
+    
+    // Render cards
+    function renderCards(filter = 'all') {
+      gallery.innerHTML = '';
+      circuits.forEach(circuit => {
+        if (filter !== 'all' && circuit.catClass !== filter) return;
+        
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <div class="card-icon">
+            ${circuit.icon}
+          </div>
+          <div class="card-content">
+            <div class="card-header">
+              <h2 class="card-title">${circuit.name}</h2>
+              <span class="card-badge badge-${circuit.catClass}">${circuit.category}</span>
+            </div>
+            <p class="card-desc">${circuit.desc}</p>
+            <a href="/?tmpl=${circuit.id}" class="card-btn">Open in Simulator &rarr;</a>
+          </div>
+        `;
+        gallery.appendChild(card);
+      });
+    }
+
+    // Initial render
+    renderCards();
+
+    // Filtering logic
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        // Update active class
+        filterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        // Filter cards
+        renderCards(btn.dataset.filter);
+      });
+    });
+  </script>
+</body>
+</html>

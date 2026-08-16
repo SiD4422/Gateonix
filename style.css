@@ -603,3 +603,83 @@ body {
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border-hi);border-radius:10px;}
+
+/* =============================================
+   MOBILE RESPONSIVE — Simulator Layout
+   ============================================= */
+@media (max-width: 768px) {
+
+  /* Stack workspace vertically */
+  #workspace {
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  /* Hide left panel by default, show as bottom drawer */
+  #left-panel {
+    width: 100% !important;
+    height: auto;
+    max-height: 220px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-right: none;
+    border-top: 1px solid var(--border-2);
+    order: 2;
+    flex-shrink: 0;
+  }
+
+  /* Horizontal scrollable palette on mobile */
+  .ps { display: inline-block; min-width: max-content; padding: 8px 12px; }
+  .palette-grid { flex-direction: row; flex-wrap: nowrap; gap: 6px; }
+  .tmpl-list { display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 4px; padding-bottom: 4px; }
+  .ps-title { display: none; }
+
+  /* Canvas fills most of the screen */
+  #canvas-area {
+    order: 1;
+    flex: 1;
+    min-height: 55vh;
+  }
+
+  /* Hide right code panel on mobile — too small to be useful */
+  #right-panel {
+    display: none;
+  }
+
+  /* Topbar: wrap and scroll horizontally */
+  #topbar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 0 8px;
+    gap: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Smaller topbar buttons on mobile */
+  .tb-btn {
+    font-size: 9px;
+    padding: 3px 6px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* Zoom bar bigger touch targets */
+  #zoom-bar button {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+
+  /* App takes full viewport */
+  #app { height: calc(100vh - 56px); }
+
+  /* Minimap hidden on mobile */
+  #minimap-box { display: none; }
+}
+
+@media (max-width: 480px) {
+  /* Very small phones — hide clock badge */
+  #clock-badge { display: none; }
+  .user-pill #user-name { display: none; }
+}
+

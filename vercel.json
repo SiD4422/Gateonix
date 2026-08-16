@@ -1,9 +1,11 @@
 {
   "cleanUrls": true,
   "rewrites": [
-    { "source": "/about", "destination": "/ABOUT.html" },
+    { "source": "/about",    "destination": "/ABOUT.html"    },
     { "source": "/devloper", "destination": "/Devloper.html" },
-    { "source": "/feedback", "destination": "/Feedback.html" }
+    { "source": "/feedback", "destination": "/Feedback.html" },
+    { "source": "/learn",    "destination": "/learn.html"    },
+    { "source": "/gallery",  "destination": "/gallery.html"  }
   ],
   "headers": [
     {

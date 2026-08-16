@@ -606,13 +606,68 @@ function escHtml(s) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+// ===== SHARE VIA URL =====
+function shareCircuit() {
+  const state = { gates, connections, nextId };
+  try {
+    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(state))));
+    const url = location.origin + location.pathname + '?circuit=' + encoded;
+    navigator.clipboard.writeText(url).then(() => {
+      setStatus('🔗 Share link copied to clipboard!');
+    }).catch(() => {
+      prompt('Copy this share link:', url);
+    });
+  } catch(e) {
+    setStatus('Could not generate share link.');
+  }
+}
+
+const shareBtn = document.getElementById('btn-share');
+if (shareBtn) shareBtn.addEventListener('click', shareCircuit);
+
 // ===== INIT =====
 resize();
 (function init(){
   gates=[]; connections=[]; nextId=1;
   window._conns=connections;
 
-  // ── K-Map export: load pending circuit if redirected from kmap.html ──
+  // ── Priority 1: URL ?circuit= param (shared link) ──
+  const urlParams = new URLSearchParams(location.search);
+  const circuitParam = urlParams.get('circuit');
+  if (circuitParam) {
+    try {
+      const d = JSON.parse(decodeURIComponent(escape(atob(circuitParam))));
+      gates = (d.gates || []).map(g=>({...g, clockVal:0, q:0, nq:1, prevClk:0}));
+      connections = d.connections || [];
+      nextId = d.nextId || gates.reduce((m,g)=>Math.max(m,g.id),0)+1;
+      window._conns = connections;
+      // Clean URL without reloading
+      history.replaceState(null, '', location.pathname);
+      simulate(); render(); setTimeout(fitView, 60);
+      renderUserTemplates(); renderCircuitTruthTable();
+      if (typeof CodePanel !== 'undefined') CodePanel.push();
+      setStatus('✅ Shared circuit loaded! ' + gates.length + ' gates · ' + connections.length + ' wires');
+      return;
+    } catch(e) { /* fall through */ }
+  }
+
+  // ── Priority 2: URL ?tmpl= param (gallery/learn page links) ──
+  const tmplParam = urlParams.get('tmpl');
+  if (tmplParam && TEMPLATES[tmplParam]) {
+    const t = TEMPLATES[tmplParam];
+    gates = t.gates.map(g=>({...g, clockVal:0, q:0, nq:1, prevClk:0}));
+    connections = t.connections.map(c=>({...c}));
+    nextId = gates.reduce((m,g)=>Math.max(m,g.id),0)+1;
+    window._conns = connections;
+    history.replaceState(null, '', location.pathname);
+    simulate(); render(); setTimeout(fitView, 60);
+    renderUserTemplates(); renderCircuitTruthTable();
+    if (typeof CodePanel !== 'undefined') CodePanel.push();
+    setStatus('Template loaded: ' + t.name);
+    return;
+  }
+
+  // ── Priority 3: K-Map export ──
   const pending = localStorage.getItem('lf_kmap_export');
   if (pending) {
     localStorage.removeItem('lf_kmap_export');
@@ -624,7 +679,7 @@ resize();
       renderUserTemplates();
       renderCircuitTruthTable();
       if (typeof CodePanel !== 'undefined') CodePanel.push();
-      setStatus('K-Map circuit loaded! ' + gates.length + ' gates \u00b7 ' + connections.length + ' wires');
+      setStatus('K-Map circuit loaded! ' + gates.length + ' gates · ' + connections.length + ' wires');
       return;
     } catch(e) { /* fall through */ }
   }

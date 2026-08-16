@@ -1,0 +1,52 @@
+# Gateonix: Advanced Digital Logic and Computing Lab
+
+> **Bottom Line Up Front:** Gateonix is a highly performant, browser-native simulation environment for digital logic circuits. By leveraging HTML5 Canvas and a pure JavaScript simulation engine, it provides real-time state propagation, supports 4 types of flip-flops, 11 MSI components, and features a multi-language code export engine (Python, C, C++, Verilog, VHDL). The engine utilizes Kahn's algorithm for topological sorting to prevent illegal combinational feedback loops, allowing fluid dynamic interactions at 60 FPS.
+
+## Core Simulation Engine Mechanics
+
+### State Propagation and Topological Sorting
+The Gateonix engine separates combinational logic from sequential logic to ensure deterministic state propagation. When a state change occurs, the engine first resolves all combinational gates. To handle complex graphs and prevent infinite recursive loops from un-clocked feedback, the validation engine implements Kahn's Algorithm for topological sorting. This allows the simulator to flag illegal combinational loops immediately while permitting stable feedback in sequential components.
+
+### Sequential Logic and Edge Detection
+The simulator accurately models sequential logic using internal state memory for Flip-Flops. 
+- **Synchronous vs Ripple Evaluation:** During the simulation phase, flip-flops are evaluated based on clock edge detection. The engine tracks the `prevClk` state within the gate object to detect precise rising or falling edges.
+- **Race Condition Mitigation:** To prevent race conditions, particularly in ripple counters where the output of one flip-flop acts as the clock for another, the engine runs sequential evaluation in multiple targeted passes, settling primary clock domains before evaluating derived clock signals.
+
+## Component Library and Capabilities
+
+Gateonix provides a comprehensive set of logic gates and Medium Scale Integration (MSI) components.
+
+### Basic IEEE Logic Gates
+All basic gates are rendered on the HTML5 Canvas using exact bezier curve representations of the IEEE/ANSI standard symbols (not just labeled boxes).
+- AND, OR, NOT, NAND, NOR, XOR, XNOR, BUFFER
+
+### Flip-Flops
+- **SR Flip-Flop:** Standard Set-Reset latch with rising-edge clocking.
+- **D Flip-Flop:** Data flip-flop, essential for shift registers.
+- **JK Flip-Flop:** Universal flip-flop with toggle capability.
+- **T Flip-Flop:** Toggle flip-flop, utilized in asynchronous counters.
+
+### MSI Components
+The simulator natively supports complex integrated components, significantly reducing the canvas footprint for large designs.
+- Multiplexers (MUX 2:1, MUX 4:1)
+- Demultiplexers (DEMUX 1:2)
+- Decoders (2-to-4, 3-to-8)
+- Encoders (4-to-2, Priority Encoder)
+- Arithmetic (Half Adder, Full Adder)
+- Comparators (4-bit magnitude comparator)
+
+## Multi-Language Code Generation
+
+A core differentiator of Gateonix is its ability to compile visual graphs into executable source code. The `codepanel.js` engine traverses the connection graph to generate logically equivalent code in five languages.
+
+### Hardware Description Languages (HDL)
+- **Verilog:** Generates structural Verilog modules, explicitly declaring `wire` and `reg` types, and mapping gates to continuous `assign` statements or `always` blocks for sequential logic.
+- **VHDL:** Produces VHDL entity and architecture definitions using standard IEEE `std_logic_1164` libraries.
+
+### Software Languages
+- **C & C++:** Generates imperative code utilizing bitwise operators (`&`, `|`, `^`, `~`) to simulate logic states within standard function blocks.
+- **Python:** Outputs clean, readable Python scripts using boolean operators (`and`, `or`, `not`) to replicate the circuit's boolean expression.
+
+## Boolean Expression Parsing
+
+Gateonix includes a recursive-descent parser that can ingest algebraic boolean expressions (e.g., `(A+B)(A'+C)`) and instantly generate the corresponding visual circuit layout. The algorithm calculates the Abstract Syntax Tree (AST) depth to automatically assign grid columns, resulting in a perfectly organized left-to-right circuit graph without manual routing.

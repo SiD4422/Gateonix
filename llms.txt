@@ -1,0 +1,15 @@
+# Gateonix
+
+> Gateonix is a browser-native environment for designing, simulating, and understanding digital logic circuits. It features real-time simulation, topological sort loop detection, IEEE standard gate rendering, and multi-language code export (Verilog, VHDL, Python, C, C++). 
+
+## Core Documentation
+
+- [Full Application Context](https://gateonix.vercel.app/llms-full.txt)
+- [About Gateonix](https://gateonix.vercel.app/ABOUT.html)
+- [Simulator Guide](https://gateonix.vercel.app/help.html)
+- [Karnaugh Map Tool](https://gateonix.vercel.app/kmap.html)
+
+## Optional
+
+- [Developer Info](https://gateonix.vercel.app/Devloper.html)
+- [Feedback](https://gateonix.vercel.app/Feedback.html)

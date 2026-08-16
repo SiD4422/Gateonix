@@ -1,0 +1,13 @@
+{
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Link",
+          "value": "<https://gateonix.vercel.app/llms.txt>; rel=\"llms-txt\""
+        }
+      ]
+    }
+  ]
+}

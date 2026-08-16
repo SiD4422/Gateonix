@@ -1,0 +1,27 @@
+{
+  "name": "Gateonix",
+  "short_name": "Gateonix",
+  "description": "Free browser-native digital logic circuit simulator. Build, simulate, and export logic gates, flip-flops, and MSI components.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#080b10",
+  "theme_color": "#00d4aa",
+  "orientation": "landscape",
+  "icons": [
+    {
+      "src": "https://gateonix.vercel.app/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    }
+  ],
+  "categories": ["education", "productivity", "utilities"],
+  "screenshots": [
+    {
+      "src": "https://gateonix.vercel.app/",
+      "sizes": "1280x800",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Gateonix Logic Circuit Simulator"
+    }
+  ]
+}

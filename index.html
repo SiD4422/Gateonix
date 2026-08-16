@@ -13,7 +13,9 @@
   <meta name="twitter:title" content="Gateonix — Circuit Simulator"/>
   <meta name="twitter:description" content="A browser-native environment for designing, simulating, and understanding digital logic circuits."/>
   <meta name="google-site-verification" content="fIbEL_lOH2t2faDiWAj5AVuFK8NfmEyvpkEMD3-dCgk" />
-  <title>Gateonix — Circuit Simulator</title>
+  <meta name="theme-color" content="#00d4aa"/>
+  <link rel="manifest" href="/manifest.json"/>
+  <title>Gateonix — Free Digital Logic Circuit Simulator | Gates, Flip-Flops & Code Export</title>
   
   <script type="application/ld+json">
   {
@@ -100,6 +102,63 @@
     /* Adjust app height to account for site-nav */
     #app { height: calc(100vh - 56px); }
 
+    /* ── Hamburger menu for mobile ── */
+    #sn-hamburger {
+      display: none; flex-direction: column; justify-content: center;
+      gap: 5px; cursor: pointer; padding: 6px; margin-left: auto;
+      background: none; border: none;
+    }
+    #sn-hamburger span {
+      display: block; width: 22px; height: 2px;
+      background: #e2e8f0; border-radius: 2px;
+      transition: all 0.25s;
+    }
+    @media (max-width: 768px) {
+      #sn-hamburger { display: flex; }
+      #site-nav .sn-links, #site-nav .sn-cta { display: none; }
+      #site-nav .sn-links.open {
+        display: flex; flex-direction: column;
+        position: absolute; top: 56px; left: 0; right: 0;
+        background: rgba(8,10,14,0.98);
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+        padding: 12px 24px; gap: 4px; z-index: 500;
+      }
+      #site-nav .sn-links.open + .sn-cta { display: none; }
+    }
+
+    /* ── Mobile warning overlay ── */
+    #mobile-wall {
+      display: none;
+      position: fixed; inset: 0; z-index: 9999;
+      background: linear-gradient(135deg, #080b10 0%, #0d1a14 100%);
+      align-items: center; justify-content: center; flex-direction: column;
+      text-align: center; padding: 32px;
+      font-family: 'Syne', sans-serif;
+    }
+    #mobile-wall .mw-icon { font-size: 56px; margin-bottom: 16px; }
+    #mobile-wall h1 {
+      font-size: 22px; font-weight: 800; color: #e2e8f0;
+      margin-bottom: 10px; letter-spacing: -0.02em;
+    }
+    #mobile-wall p {
+      font-size: 14px; color: #64748b; max-width: 300px;
+      line-height: 1.6; margin-bottom: 24px;
+    }
+    #mobile-wall .mw-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(0,212,170,0.1); border: 1px solid rgba(0,212,170,0.3);
+      color: #00d4aa; padding: 8px 20px; border-radius: 20px;
+      font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700;
+    }
+    #mobile-wall .mw-continue {
+      margin-top: 16px; background: none; border: none;
+      color: #3d4a5a; font-size: 11px; font-family: 'JetBrains Mono', monospace;
+      cursor: pointer; text-decoration: underline;
+    }
+    @media (max-width: 768px) {
+      #mobile-wall { display: flex; }
+    }
+
     /* ── Circuit status indicator (replaces logo in topbar) ── */
     .circuit-status {
       display: flex; align-items: center; gap: 7px;
@@ -132,20 +191,31 @@
 <body>
 
 <!-- ── Site-wide navigation ── -->
-<nav id="site-nav">
-  <a class="sn-logo" href="ABOUT.html">
+<!-- Mobile warning wall -->
+<div id="mobile-wall" role="dialog" aria-modal="true" aria-label="Desktop recommended">
+  <div class="mw-icon">🖥️</div>
+  <h1>Best on Desktop</h1>
+  <p>Gateonix is a full-featured circuit simulator designed for desktop screens. For the best experience, open it on a laptop or desktop.</p>
+  <div class="mw-badge">⬡ &nbsp;Gateonix</div>
+  <button class="mw-continue" onclick="document.getElementById('mobile-wall').style.display='none'" aria-label="Continue anyway on mobile">Continue anyway →</button>
+</div>
+
+<nav id="site-nav" role="navigation" aria-label="Site navigation">
+  <a class="sn-logo" href="/about">
     <span class="sn-logo-icon">⬡</span>
     <span class="sn-logo-name">Gateonix</span>
   </a>
+  <button id="sn-hamburger" aria-label="Toggle navigation menu" aria-expanded="false" onclick="var l=document.querySelector('.sn-links');var open=l.classList.toggle('open');this.setAttribute('aria-expanded',open);">
+    <span></span><span></span><span></span>
+  </button>
   <div class="sn-links">
-    <a href="index.html"    class="sn-link active">Simulator</a>
-   
-    <a href="ABOUT.html"    class="sn-link">About</a>
-    <a href="help.html"     class="sn-link">Guide</a>
-    <a href="Devloper.html" class="sn-link">Developers</a>
-    <a href="Feedback.html" class="sn-link">Feedback</a>
+    <a href="/" class="sn-link active">Simulator</a>
+    <a href="/about" class="sn-link">About</a>
+    <a href="/help" class="sn-link">Guide</a>
+    <a href="/devloper" class="sn-link">Developers</a>
+    <a href="/feedback" class="sn-link">Feedback</a>
   </div>
-  <a href="login.html" class="sn-cta">Launch App →</a>
+  <a href="/login" class="sn-cta">Launch App →</a>
 </nav>
 
 <main id="app">

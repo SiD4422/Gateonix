@@ -611,34 +611,38 @@ body {
 
   /* Stack workspace vertically */
   #workspace {
-    flex-direction: column;
-    overflow-y: auto;
+    flex-direction: column !important;
+    overflow-y: auto !important;
   }
 
   /* Hide left panel by default, show as bottom drawer */
   #left-panel {
-    width: 100% !important;
-    height: auto;
-    max-height: 220px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    border-right: none;
-    border-top: 1px solid var(--border-2);
-    order: 2;
-    flex-shrink: 0;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: auto !important;
+    max-height: 160px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    flex-direction: row !important; /* side-by-side categories */
+    border-right: none !important;
+    border-top: 1px solid var(--border-2) !important;
+    order: 2 !important;
+    flex-shrink: 0 !important;
+    padding-bottom: 8px !important;
   }
 
   /* Horizontal scrollable palette on mobile */
-  .ps { display: inline-block; min-width: max-content; padding: 8px 12px; }
-  .palette-grid { flex-direction: row; flex-wrap: nowrap; gap: 6px; }
-  .tmpl-list { display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 4px; padding-bottom: 4px; }
-  .ps-title { display: none; }
+  .ps { display: inline-flex; flex-direction: column; min-width: max-content; padding: 8px 12px; border-bottom: none !important; border-right: 1px solid var(--border); }
+  .palette-grid { display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; gap: 6px !important; }
+  .tmpl-list { display: flex !important; flex-wrap: nowrap !important; overflow-x: auto !important; gap: 4px !important; padding-bottom: 4px !important; }
+  .ps-title { display: none !important; }
 
   /* Canvas fills most of the screen */
   #canvas-area {
-    order: 1;
-    flex: 1;
-    min-height: 55vh;
+    order: 1 !important;
+    flex: 1 1 auto !important;
+    width: 100vw !important;
+    min-height: 55vh !important;
   }
 
   /* Hide right code panel on mobile — too small to be useful */

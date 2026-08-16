@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learn Digital Logic — Gates, Flip-Flops, K-Maps | Gateonix</title>
+    <meta name="description" content="Free digital logic tutorial covering all logic gates (AND, OR, NOT, NAND, NOR, XOR), Boolean algebra, flip-flops (SR, D, JK, T), combinational circuits, and Karnaugh Maps. Interactive simulator included."/>
+    <meta name="keywords" content="learn digital logic, logic gates tutorial, AND gate, OR gate, NOT gate, flip-flop tutorial, Karnaugh map explained, Boolean algebra, combinational circuits, sequential circuits"/>
+    <meta property="og:title" content="Learn Digital Logic — Free Tutorial | Gateonix"/>
+    <meta property="og:description" content="Master digital logic circuits with our free, comprehensive tutorial. Covers all gates, flip-flops, K-Maps and more with an interactive simulator."/>
+    <link rel="manifest" href="/manifest.json"/>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #080a0e;
+            --bg-panel: #0f1218;
+            --bg-surface: #161b24;
+            --accent: #00d4aa;
+            --accent-hover: #00e5ba;
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --val-0: #ff5555;
+            --val-1: #00d4aa;
+            --border: #1e293b;
+        }
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            overflow-x: hidden;
+            background-image: radial-gradient(circle at 50% 0%, rgba(0,212,170,0.05) 0%, transparent 70%);
+        }
+        h1, h2, h3, h4, h5, h6 { font-family: 'Syne', sans-serif; font-weight: 800; margin-top: 0; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        a { color: var(--accent); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        
+        /* Nav */
+        nav#site-nav {
+            display: flex;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: rgba(15, 18, 24, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        nav#site-nav a.sn-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+        nav#site-nav .nav-links {
+            margin-left: auto;
+            display: flex;
+            gap: 4px;
+        }
+        nav#site-nav .nav-links a {
+            color: var(--text-muted);
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-family: 'Syne', sans-serif;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        nav#site-nav .nav-links a:hover {
+            color: var(--text-main);
+            background: var(--bg-surface);
+            text-decoration: none;
+        }
+
+        /* Buttons */
+        .cta-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 24px;
+            background: var(--accent);
+            color: #000;
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+        }
+        .cta-btn:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 212, 170, 0.3);
+            text-decoration: none;
+        }
+        .cta-btn-outline {
+            background: transparent;
+            color: var(--accent);
+            border: 2px solid var(--accent);
+        }
+        .cta-btn-outline:hover {
+            background: rgba(0, 212, 170, 0.1);
+            color: var(--accent-hover);
+        }
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+
+        /* Layout */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        section {
+            padding: 6rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        section:last-child {
+            border-bottom: none;
+        }
+
+        /* Hero */
+        .hero {
+            text-align: center;
+            padding: 8rem 0;
+        }
+        .hero h1 {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff 0%, #a0aec0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero p {
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto 2.5rem;
+        }
+        .hero .btn-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        /* Typography */
+        .text-center { text-align: center; }
+        .section-title { font-size: 2.5rem; margin-bottom: 1rem; }
+        .section-desc { font-size: 1.1rem; color: var(--text-muted); margin-bottom: 3rem; max-width: 800px; }
+        .lead-text { font-size: 1.25rem; color: var(--text-main); margin-bottom: 2rem; }
+
+        /* Grids & Cards */
+        .grid-2 {
+            display: grid;
+            gap: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        }
+        .grid-3 {
+            display: grid;
+            gap: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+        .card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 2rem;
+            transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .card-header h3 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: var(--text-main);
+        }
+        .gate-icon {
+            width: 80px;
+            height: 40px;
+            fill: none;
+            stroke: var(--accent);
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        
+        /* Tables */
+        .table-wrapper {
+            background: var(--bg-surface);
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            margin: 1rem 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+        }
+        th, td {
+            padding: 0.75rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            background: var(--bg-panel);
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+        tr:nth-child(even) {
+            background: rgba(255,255,255,0.02);
+        }
+        tr:last-child td { border-bottom: none; }
+        td:not(:last-child), th:not(:last-child) {
+            border-right: 1px solid var(--border);
+        }
+        .val-0 { color: var(--val-0); font-weight: bold; }
+        .val-1 { color: var(--val-1); font-weight: bold; }
+
+        .formula {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-surface);
+            padding: 0.75rem 1rem;
+            border-radius: 4px;
+            color: var(--accent);
+            display: inline-block;
+            border: 1px solid var(--border);
+            font-size: 1.1rem;
+        }
+
+        /* Scroll Reveal */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease-out;
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .law-grid {
+            display: grid;
+            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+        .law-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .law-title { font-weight: 800; margin-bottom: 1rem; font-family: 'Syne', sans-serif; color: var(--text-muted); font-size: 1.1rem;}
+        .law-card .formula { margin: 0; display: block; }
+        .law-card:hover { border-color: var(--accent); }
+
+        /* K-Map */
+        .kmap-visual {
+            background: var(--bg-panel);
+            padding: 2rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 2rem;
+        }
+        .kmap-table {
+            margin: 0 auto;
+            width: auto;
+            background: var(--bg-surface);
+        }
+        .kmap-table th, .kmap-table td {
+            padding: 1rem 1.5rem;
+            font-size: 1.1rem;
+        }
+
+        /* Footer CTA */
+        .footer-cta {
+            text-align: center;
+            padding: 8rem 0;
+            background: linear-gradient(to top, rgba(0, 212, 170, 0.05), transparent);
+        }
+        .footer-cta h2 { font-size: 3rem; margin-bottom: 2rem; }
+    </style>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "LearningResource",
+      "name": "Digital Logic Tutorial",
+      "description": "Comprehensive tutorial on logic gates, Boolean algebra, flip-flops, and Karnaugh maps with an interactive simulator.",
+      "url": "https://gateonix.vercel.app/learn",
+      "about": ["Digital Logic", "Computer Science", "Electrical Engineering"],
+      "learningResourceType": ["Tutorial", "Interactive Resource"]
+    }
+    </script>
+</head>
+<body>
+
+    <nav id="site-nav" role="navigation" aria-label="Site navigation">
+        <a class="sn-logo" href="/">
+            <span style="font-size:22px;color:#00d4aa">⬡</span>
+            <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:#e2e8f0">Gateonix</span>
+        </a>
+        <div class="nav-links">
+            <a href="/">Simulator</a>
+            <a href="/about">About</a>
+            <a href="/learn">Learn</a>
+            <a href="/help">Guide</a>
+            <a href="/devloper">Developers</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Hero Section -->
+        <section class="hero reveal">
+            <h1>Learn Digital Logic</h1>
+            <p>From basic gates to flip-flops — everything you need to master digital circuit design.</p>
+            <div class="btn-group">
+                <a href="/" class="cta-btn">Open Simulator →</a>
+                <a href="/kmap" class="cta-btn cta-btn-outline">Try K-Map Solver →</a>
+            </div>
+        </section>
+
+        <!-- What is Digital Logic? -->
+        <section class="reveal">
+            <h2 class="section-title">What is Digital Logic?</h2>
+            <div class="lead-text">
+                <p>Digital logic is the foundational concept behind all modern computational devices, from simple calculators to advanced supercomputers. It is the mathematical framework based on Boolean algebra that allows electronic circuits to process binary information—ones and zeros, representing high and low voltages.</p>
+                <p>At its core, digital logic involves using microscopic electronic switches (transistors) arranged into "gates." These gates perform basic logical operations like AND, OR, and NOT. By combining thousands or millions of these simple building blocks, engineers create combinational circuits (like adders and multiplexers) for processing data, and sequential circuits (like flip-flops and registers) for storing memory.</p>
+                <p>Understanding digital logic is essential for anyone interested in computer science, computer engineering, or electronics. It bridges the gap between hardware and software, revealing exactly how a computer thinks and processes information at the physical level.</p>
+            </div>
+        </section>
+
+        <!-- Logic Gates Reference -->
+        <section class="reveal">
+            <h2 class="section-title">Logic Gates Reference</h2>
+            <p class="section-desc">Logic gates are the basic building blocks of any digital system. Here is a comprehensive reference to the standard logic gates, their symbols, truth tables, and Boolean expressions.</p>
+            
+            <div class="grid-2">
+                <!-- AND Gate -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>AND Gate</h3>
+                        <svg class="gate-icon" viewBox="0 0 100 50">
+                            <path d="M10,10 L40,10 A20,20 0 0 1 40,50 L10,50 Z" />
+                            <line x1="0" y1="20" x2="10" y2="20" />
+                            <line x1="0" y1="40" x2="10" y2="40" />
+                            <line x1="60" y1="30" x2="80" y2="30" />
+                        </svg>
+                    </div>
+                    <p>The AND gate outputs a high signal (1) only if <strong>all</strong> of its inputs are high. Otherwise, it outputs a low signal (0).</p>
+                    <div class="formula">F = A · B</div>
+                    <div class="table-wrapper">
+                        <table>
+                            <tr><th>A</th><th>B</th><th>Output</th></tr>
+                            <tr><td class="val-0">0</td><td class="val-0">0</td><td class="val-0">0</td></tr>
+                            <tr><td class="val-0">0</td><td class="val-1">1</td><td class="val-0">0</td></tr>
+                            <tr><td class="val-1">1</td><td class="val-0">0</td><td class="val-0">0</td></tr>
+                            <tr><td class="val-1">1</td><td class="val-1">1</td><td class="val-1">1</td></tr>
+                        </table>
+                    </div>
+                    <a href="/?tmpl=and" class="cta-btn btn-small">Try in Simulator →</a>
+                </div>
+
+                <!-- OR Gate -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>OR Gate</h3>
+                        <svg class="gate-icon" viewBox="0 0 100 50">
+                            <path d="M10,10 Q30,10 50,30 Q30,50 10,50 Q20,30 10,10" />
+                            <line x1="0" y1="20" x2="14" y2="20" />
+                            <line x1="0" y1="40" x2="14" y2="40" />
+                            <line x1="50" y1="30" x2="80" y2="30" />
+                        </svg>
+                    </div>
+                    <p>The OR gate outputs a high signal (1) if <strong>any</strong> of its inputs are high. It outputs a low signal (0) only if all inputs are low.</p>
+                    <div class="formula">F = A + B</div>
+                    <div class="table-wrapper">
+                        <table>
+                            <tr><th>A</th><th>B</th><th>Output</th></tr>
+                            <tr><td class="val-0">0</td><td class="val-0">0</td><td class="val-0">0</td></tr>
+                            <tr><td class="val-0">0</td><td class="val-1">1</td><td class="val-1">1</td></tr>
+                            <tr><td class="val-1">1</td><td class="val-0">0</td><td class="val-1">1</td></tr>
+                            <tr><td class="val-1">1</td><td class="val-1">1</td><td class="val-1">1</td></tr>
+                        </table>
+                    </div>
+                    <a href="/?tmpl=or" class="cta-btn btn-small">Try in Simulator →</a>
+                </div>
+
+                <!-- NOT Gate -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>NOT Gate (Inverter)</h3>
+                        <svg class="gate-icon" viewBox="0 0 100 50">
+                            <polygon points="20,10 50,30 20,50" />
+                            <circle cx="55" cy="30" r="5" />
+                            <line x1="0" y1="30" x2="20" y2="30" />
+                            <line x1="60" y1="30" x2="80" y2="30" />
+                        </svg>
+                    </div>
+                    <p>The NOT gate, or inverter, simply reverses the input state. If the input is high (1), the output is low (0), and vice versa.</p>
+                    <div class="formula">F = A'</div>
+                    <div class="table-wrapper">
+                        <table>
+                            <tr><th>A</th><th>Output</th></tr>
+                            <tr><td class="val-0">0</td><td class="val-1">1</td></tr>
+                            <tr><td class="val-1">1</td><td class="val-0">0</td></tr>
+                        </table>
+                    </div>
+                    <a href="/?tmpl=not" class="cta-btn btn-small">Try in Simulator →</a>
+                </div>
+
+                <!-- NAND Gate -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>NAND Gate</h3>
+                        <svg class="gate-icon" viewBox="0 0 100 50">
+                            <path d="M10,10 L30,10 A20,20 0 0 1 30,50 L10,50 Z" />
+                            <circle cx="55" cy="30" r="5" />
+                            <line x1="0" y1="20" x2="10" y2="20" />
+                            <line x1="0" y1="40" x2="10" y2="40" />
+                            <line x1="60" y1="30" x2="80" y2="30" />
+                        </svg>
+                    </div>
+                    <p>The NAND gate is a universal gate. It behaves exactly opposite to the AND gate. It outputs low (0) only if all inputs are high (1).</p>
+                    <div class="formula">F = (A · B)'</div>
+                    <div class="table-wrapper">
+                        <table>
+                            <tr><th>A</th><th>B</th><th>Output</th></tr>
+                            <tr><td class="val-0">0</td><td class="val-0">0</td><td class="val-1">1</td></tr>
+                            <tr><td class="val-0">0</td><td class="val-1">1</td><td class="val-1">1</td></tr>
+                            <tr><td class="val-1">1</td><td class="val-0">0</td><td class="val-1">1</td></tr>
+                            <tr><td class="val-1">1</td><td class="val-1">1</td><td class="val-0">0</td></tr>
+                        </table>
+                    </div>
+                    <a href="/?tmpl=nand" class="cta-btn btn-small">Try in Simulator →</a>
+                </div>
+
+                <!-- NOR Gate -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>NOR Gate</h3>
+                        <svg class="gate-icon" viewBox="0 0 100 50">
+                            <path d="M10,10 Q25,10 40,30 Q25,50 10,50 Q18,30 10,10" />
+                            <circle cx="46" cy="30" r="5" />
+                            <line x1="0" y1="20" x2="13" y2="20" />
+                            <line x1="0" y1="40" x2="13" y2="40" />
+                            <line x1="51" y1="30" x2="80" y2="30" />
+                        </svg>
+                    </div>
+                    <p>The NOR gate is also universal. It behaves oppositely to the OR gate. It outputs high (1) only if all inputs are low (0).</p>
+                    <div class="formula">F = (A + B)'</div>
+                    <div class="table-wrapper">
+                        <table>
+                            <tr><th>A</th><th>B</th><th>Output</th></tr>
+                            <tr><td class="val-0">0</td><td class="val-0">0</td><td class="val-1">1</td></tr>
+                            <tr><td class="val-0">0</td><td class="val-1">1</td><td class="val-0">0</td></tr>
+                            <tr><td class="val-1">1</td><td class="val-0">0</td><td class="val-0">0</td></tr>
+                            <tr><td class="val-1">1</td><td class="val-1">1</td><td class="val-0">0</td></tr>
+                        </table>
+                    </div>
+                    <a href="/?tmpl=nor" class="cta-btn btn-small">Try in Simulator →</a>
+                </div>
+
+                <!-- XOR Gate -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>XOR Gate</h3>
+                        <svg class="gate-icon" viewBox="0 0 100 50">
+                            <path d="M5,10 Q15,30 5,50" />
+                            <path d="M12,10 Q27,10 42,30 Q27,50 12,50 Q20,30 12,10" />
+                            <line x1="0" y1="20" x2="10" y2="20" />
+                            <line x1="0" y1="40" x2="10" y2="40" />
+                            <line x1="42" y1="30" x2="80" y2="30" />
+                        </svg>
+                    </div>
+                    <p>The Exclusive-OR (XOR) gate outputs high (1) only when its inputs are different. It is widely used in arithmetic circuits.</p>
+                    <div class="formula">F = A ⊕ B</div>
+                    <div class="table-wrapper">
+                        <table>
+                            <tr><th>A</th><th>B</th><th>Output</th></tr>
+                            <tr><td class="val-0">0</td><td class="val-0">0</td><td class="val-0">0</td></tr>
+                            <tr><td class="val-0">0</td><td class="val-1">1</td><td class="val-1">1</td></tr>
+                            <tr><td class="val-1">1</td><td class="val-0">0</td><td class="val-1">1</td></tr>
+                            <tr><td class="val-1">1</td><td class="val-1">1</td><td class="val-0">0</td></tr>
+                        </table>
+                    </div>
+                    <a href="/?tmpl=xor" class="cta-btn btn-small">Try in Simulator →</a>
+                </div>
+
+                <!-- XNOR Gate -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>XNOR Gate</h3>
+                        <svg class="gate-icon" viewBox="0 0 100 50">
+                            <path d="M5,10 Q15,30 5,50" />
+                            <path d="M12,10 Q27,10 42,30 Q27,50 12,50 Q20,30 12,10" />
+                            <circle cx="48" cy="30" r="5" />
+                            <line x1="0" y1="20" x2="10" y2="20" />
+                            <line x1="0" y1="40" x2="10" y2="40" />
+                            <line x1="53" y1="30" x2="80" y2="30" />
+                        </svg>
+                    </div>
+                    <p>The Exclusive-NOR (XNOR) gate outputs high (1) only when its inputs are identical. It acts as an equality comparator.</p>
+                    <div class="formula">F = (A ⊕ B)'</div>
+                    <div class="table-wrapper">
+                        <table>
+                            <tr><th>A</th><th>B</th><th>Output</th></tr>
+                            <tr><td class="val-0">0</td><td class="val-0">0</td><td class="val-1">1</td></tr>
+                            <tr><td class="val-0">0</td><td class="val-1">1</td><td class="val-0">0</td></tr>
+                            <tr><td class="val-1">1</td><td class="val-0">0</td><td class="val-0">0</td></tr>
+                            <tr><td class="val-1">1</td><td class="val-1">1</td><td class="val-1">1</td></tr>
+                        </table>
+                    </div>
+                    <a href="/?tmpl=xnor" class="cta-btn btn-small">Try in Simulator →</a>
+                </div>
+
+                <!-- BUFFER Gate -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>BUFFER Gate</h3>
+                        <svg class="gate-icon" viewBox="0 0 100 50">
+                            <polygon points="20,10 50,30 20,50" />
+                            <line x1="0" y1="30" x2="20" y2="30" />
+                            <line x1="50" y1="30" x2="80" y2="30" />
+                        </svg>
+                    </div>
+                    <p>A buffer outputs exactly what is input into it. It doesn't change the logic state but is used to amplify signals or add delay.</p>
+                    <div class="formula">F = A</div>
+                    <div class="table-wrapper">
+                        <table>
+                            <tr><th>A</th><th>Output</th></tr>
+                            <tr><td class="val-0">0</td><td class="val-0">0</td></tr>
+                            <tr><td class="val-1">1</td><td class="val-1">1</td></tr>
+                        </table>
+                    </div>
+                    <a href="/?tmpl=buffer" class="cta-btn btn-small">Try in Simulator →</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Boolean Algebra Laws -->
+        <section class="reveal">
+            <h2 class="section-title">Boolean Algebra Laws</h2>
+            <p class="section-desc">Boolean algebra uses rules to simplify logical expressions, which helps in reducing the number of gates needed in a digital circuit.</p>
+            
+            <div class="law-grid">
+                <div class="law-card">
+                    <div class="law-title">Identity Law</div>
+                    <div class="formula">A + 0 = A</div>
+                    <div class="formula">A · 1 = A</div>
+                </div>
+                <div class="law-card">
+                    <div class="law-title">Null Law</div>
+                    <div class="formula">A + 1 = 1</div>
+                    <div class="formula">A · 0 = 0</div>
+                </div>
+                <div class="law-card">
+                    <div class="law-title">Idempotent Law</div>
+                    <div class="formula">A + A = A</div>
+                    <div class="formula">A · A = A</div>
+                </div>
+                <div class="law-card">
+                    <div class="law-title">Complement Law</div>
+                    <div class="formula">A + A' = 1</div>
+                    <div class="formula">A · A' = 0</div>
+                </div>
+                <div class="law-card">
+                    <div class="law-title">Commutative Law</div>
+                    <div class="formula">A + B = B + A</div>
+                    <div class="formula">A · B = B · A</div>
+                </div>
+                <div class="law-card">
+                    <div class="law-title">Associative Law</div>
+                    <div class="formula">(A+B)+C = A+(B+C)</div>
+                    <div class="formula">(A·B)·C = A·(B·C)</div>
+                </div>
+                <div class="law-card">
+                    <div class="law-title">Distributive Law</div>
+                    <div class="formula">A·(B+C) = (A·B)+(A·C)</div>
+                    <div class="formula">A+(B·C) = (A+B)·(A+C)</div>
+                </div>
+                <div class="law-card">
+                    <div class="law-title">De Morgan's Theorems</div>
+                    <div class="formula">(A + B)' = A' · B'</div>
+                    <div class="formula">(A · B)' = A' + B'</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Combinational Circuits -->
+        <section class="reveal">
+            <h2 class="section-title">Combinational Circuits</h2>
+            <p class="section-desc">Combinational logic circuits have outputs that depend exclusively on their current inputs. They possess no memory. Common examples include adders, decoders, and multiplexers.</p>
+            
+            <div class="grid-2">
+                <div class="card">
+                    <h3>Half Adder</h3>
+                    <p>A half adder is a combinational circuit that adds two single binary digits (A and B). It produces two outputs: a sum (S) and a carry (C). While fundamental, it cannot accept a carry-in from a previous addition stage.</p>
+                    <div class="table-wrapper">
+                        <table>
+                            <tr><th>A</th><th>B</th><th>Sum (S)</th><th>Carry (C)</th></tr>
+                            <tr><td class="val-0">0</td><td class="val-0">0</td><td class="val-0">0</td><td class="val-0">0</td></tr>
+                            <tr><td class="val-0">0</td><td class="val-1">1</td><td class="val-1">1</td><td class="val-0">0</td></tr>
+                            <tr><td class="val-1">1</td><td class="val-0">0</td><td class="val-1">1</td><td class="val-0">0</td></tr>
+                            <tr><td class="val-1">1</td><td class="val-1">1</td><td class="val-0">0</td><td class="val-1">1</td></tr>
+                        </table>
+                    </div>
+                    <a href="/?tmpl=halfadder" class="cta-btn btn-small">Load in Simulator →</a>
+                </div>
+
+                <div class="card">
+                    <h3>Full Adder</h3>
+                    <p>A full adder expands on the half adder by accommodating a carry-in (Cin) bit from a previous addition. It adds three bits (A, B, Cin) and produces a Sum and a Carry-out, enabling the chaining of adders to compute multi-bit numbers.</p>
+                    <div class="table-wrapper">
+                        <table>
+                            <tr><th>A</th><th>B</th><th>Cin</th><th>Sum</th><th>Cout</th></tr>
+                            <tr><td class="val-0">0</td><td class="val-1">1</td><td class="val-0">0</td><td class="val-1">1</td><td class="val-0">0</td></tr>
+                            <tr><td class="val-0">0</td><td class="val-1">1</td><td class="val-1">1</td><td class="val-0">0</td><td class="val-1">1</td></tr>
+                            <tr><td class="val-1">1</td><td class="val-1">1</td><td class="val-1">1</td><td class="val-1">1</td><td class="val-1">1</td></tr>
+                            <tr><td colspan="5" style="color:var(--text-muted);font-style:italic">...and so on</td></tr>
+                        </table>
+                    </div>
+                    <a href="/?tmpl=fulladder" class="cta-btn btn-small">Load in Simulator →</a>
+                </div>
+
+                <div class="card">
+                    <h3>2:1 Multiplexer (MUX)</h3>
+                    <p>A multiplexer (MUX) is a digital switch. A 2:1 MUX takes two data inputs (I0, I1) and a single select line (S). Based on the select line's state, it routes one of the inputs to the output. It acts as a data selector.</p>
+                    <div class="table-wrapper">
+                        <table>
+                            <tr><th>S</th><th>Output (Y)</th></tr>
+                            <tr><td class="val-0">0</td><td>I0</td></tr>
+                            <tr><td class="val-1">1</td><td>I1</td></tr>
+                        </table>
+                    </div>
+                    <a href="/?tmpl=mux21" class="cta-btn btn-small">Load in Simulator →</a>
+                </div>
+
+                <div class="card">
+                    <h3>2-to-4 Decoder</h3>
+                    <p>A decoder transforms binary information from 'n' input lines to a maximum of 2^n unique output lines. A 2-to-4 decoder takes a 2-bit input and activates exactly one of its four outputs corresponding to the binary value of the input.</p>
+                    <div class="table-wrapper">
+                        <table>
+                            <tr><th>A1</th><th>A0</th><th>Y0</th><th>Y1</th><th>Y2</th><th>Y3</th></tr>
+                            <tr><td class="val-0">0</td><td class="val-0">0</td><td class="val-1">1</td><td class="val-0">0</td><td class="val-0">0</td><td class="val-0">0</td></tr>
+                            <tr><td class="val-0">0</td><td class="val-1">1</td><td class="val-0">0</td><td class="val-1">1</td><td class="val-0">0</td><td class="val-0">0</td></tr>
+                            <tr><td class="val-1">1</td><td class="val-0">0</td><td class="val-0">0</td><td class="val-0">0</td><td class="val-1">1</td><td class="val-0">0</td></tr>
+                            <tr><td class="val-1">1</td><td class="val-1">1</td><td class="val-0">0</td><td class="val-0">0</td><td class="val-0">0</td><td class="val-1">1</td></tr>
+                        </table>
+                    </div>
+                    <a href="/?tmpl=decoder24" class="cta-btn btn-small">Load in Simulator →</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sequential Circuits / Flip-Flops -->
+        <section class="reveal">
+            <h2 class="section-title">Sequential Circuits & Flip-Flops</h2>
+            <p class="section-desc">Unlike combinational circuits, sequential circuits have memory. Their output depends on both current inputs and the previous state. Flip-flops are the fundamental memory elements.</p>
+            
+            <div class="grid-2">
+                <div class="card">
+                    <h3>SR Flip-Flop</h3>
+                    <p>The Set-Reset (SR) flip-flop is the simplest memory unit. It has Set and Reset inputs. When S is 1, it stores a 1. When R is 1, it stores a 0. The state where both S and R are 1 is generally invalid or unpredictable.</p>
+                    <div class="table-wrapper">
+                        <table>
+                            <tr><th>S</th><th>R</th><th>Q(next)</th><th>State</th></tr>
+                            <tr><td class="val-0">0</td><td class="val-0">0</td><td>Q(prev)</td><td>Hold</td></tr>
+                            <tr><td class="val-0">0</td><td class="val-1">1</td><td class="val-0">0</td><td>Reset</td></tr>
+                            <tr><td class="val-1">1</td><td class="val-0">0</td><td class="val-1">1</td><td>Set</td></tr>
+                            <tr><td class="val-1">1</td><td class="val-1">1</td><td>?</td><td>Invalid</td></tr>
+                        </table>
+                    </div>
+                    <a href="/?tmpl=srff" class="cta-btn btn-small">Load in Simulator →</a>
+                </div>
+
+                <div class="card">
+                    <h3>D Flip-Flop</h3>
+                    <p>The Data (D) flip-flop eliminates the invalid state of the SR flip-flop. It simply captures the value of the D input at a specific portion of the clock cycle (e.g., rising edge) and holds it until the next cycle. It's widely used in registers.</p>
+                    <div class="table-wrapper">
+                        <table>
+                            <tr><th>Clock</th><th>D</th><th>Q(next)</th></tr>
+                            <tr><td>↑</td><td class="val-0">0</td><td class="val-0">0</td></tr>
+                            <tr><td>↑</td><td class="val-1">1</td><td class="val-1">1</td></tr>
+                            <tr><td>0/1</td><td>X</td><td>Q(prev)</td></tr>
+                        </table>
+                    </div>
+                    <a href="/?tmpl=dff" class="cta-btn btn-small">Load in Simulator →</a>
+                </div>
+
+                <div class="card">
+                    <h3>JK Flip-Flop</h3>
+                    <p>The JK flip-flop improves upon the SR flip-flop by making the J=1, K=1 condition valid. When both inputs are 1, it toggles its current state. It is highly versatile and forms the basis for many counter circuits.</p>
+                    <div class="table-wrapper">
+                        <table>
+                            <tr><th>J</th><th>K</th><th>Q(next)</th><th>State</th></tr>
+                            <tr><td class="val-0">0</td><td class="val-0">0</td><td>Q(prev)</td><td>Hold</td></tr>
+                            <tr><td class="val-0">0</td><td class="val-1">1</td><td class="val-0">0</td><td>Reset</td></tr>
+                            <tr><td class="val-1">1</td><td class="val-0">0</td><td class="val-1">1</td><td>Set</td></tr>
+                            <tr><td class="val-1">1</td><td class="val-1">1</td><td>Q(prev)'</td><td>Toggle</td></tr>
+                        </table>
+                    </div>
+                    <a href="/?tmpl=jkff" class="cta-btn btn-small">Load in Simulator →</a>
+                </div>
+
+                <div class="card">
+                    <h3>T Flip-Flop</h3>
+                    <p>The Toggle (T) flip-flop changes its state only when the T input is 1. If T is 0, it holds its state. It is primarily built from a JK flip-flop with tied inputs and is used extensively in binary counters and frequency dividers.</p>
+                    <div class="table-wrapper">
+                        <table>
+                            <tr><th>T</th><th>Q(next)</th><th>State</th></tr>
+                            <tr><td class="val-0">0</td><td>Q(prev)</td><td>Hold</td></tr>
+                            <tr><td class="val-1">1</td><td>Q(prev)'</td><td>Toggle</td></tr>
+                        </table>
+                    </div>
+                    <a href="/?tmpl=tff" class="cta-btn btn-small">Load in Simulator →</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Karnaugh Maps -->
+        <section class="reveal">
+            <h2 class="section-title">Karnaugh Maps (K-Maps)</h2>
+            <div class="lead-text">
+                <p>A Karnaugh Map (K-Map) is a visual tool used to simplify Boolean algebra expressions without using complex theorems. By arranging truth table outputs in a grid based on Gray code, K-Maps allow you to identify overlapping groups of 1s (or 0s), leading directly to a minimized logic circuit.</p>
+            </div>
+            
+            <div class="kmap-visual">
+                <h3>Example: 3-Variable K-Map</h3>
+                <p style="color:var(--text-muted); margin-bottom:1.5rem">F(A,B,C) layout</p>
+                <table class="kmap-table">
+                    <tr>
+                        <th style="border:none">A \ BC</th>
+                        <th>00</th>
+                        <th>01</th>
+                        <th>11</th>
+                        <th>10</th>
+                    </tr>
+                    <tr>
+                        <th>0</th>
+                        <td>m0</td>
+                        <td>m1</td>
+                        <td>m3</td>
+                        <td>m2</td>
+                    </tr>
+                    <tr>
+                        <th>1</th>
+                        <td>m4</td>
+                        <td>m5</td>
+                        <td>m7</td>
+                        <td>m6</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div class="text-center">
+                <a href="/kmap" class="cta-btn">Try K-Map Solver →</a>
+            </div>
+        </section>
+
+        <!-- Footer CTA -->
+        <section class="footer-cta reveal">
+            <h2>Ready to build your first circuit?</h2>
+            <a href="/" class="cta-btn" style="font-size: 1.25rem; padding: 16px 32px;">Open Gateonix Simulator →</a>
+        </section>
+    </div>
+
+    <script>
+        // Simple Intersection Observer for scroll reveal animations
+        document.addEventListener("DOMContentLoaded", () => {
+            const reveals = document.querySelectorAll('.reveal');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            reveals.forEach(reveal => {
+                observer.observe(reveal);
+            });
+        });
+    </script>
+</body>
+</html>

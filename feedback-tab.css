@@ -444,3 +444,21 @@
     transform: translateY(0);
   }
 }
+
+/* ---------- embedded mode ---------- */
+
+.gtx-feedback-embed {
+  width: 100%;
+  height: 100%;
+  display: flex;
+}
+
+.gtx-feedback-embed-root .gtx-fb-panel {
+  position: static;
+  width: 100%;
+  height: 600px;
+  max-height: 80vh;
+  transform: none;
+  border: 1px solid var(--gtx-fb-copper-dim);
+  border-radius: 14px;
+}

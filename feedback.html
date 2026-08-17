@@ -16,6 +16,7 @@
   <link rel="manifest" href="/manifest.json"/>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="feedback-tab.css">
   <style>
     :root {
       --bg:       #080a0e;
@@ -473,146 +474,49 @@
 </nav>
 
 <main>
-
-  <!-- ── Hero ── -->
   <div class="hero">
-    <div class="hero-badge"><div class="badge-dot"></div>We read every response</div>
+    <div class="hero-badge">
+      <div class="badge-dot"></div>
+      WE READ EVERY RESPONSE
+    </div>
     <h1 class="hero-title">Your feedback<br>shapes <span class="hl">Gateonix</span></h1>
-    <p class="hero-sub">Tell us what's working, what's broken, and what you wish existed. Every response goes directly to the developer.</p>
-    <div class="stats-row">
-      <div class="stat-chip">
-        <div class="stat-icon">⏱</div>
-        <div class="stat-info">
-          <div class="stat-num">~2 min</div>
-          <div class="stat-lbl">To complete</div>
-        </div>
-      </div>
-      <div class="stat-chip">
-        <div class="stat-icon">🔒</div>
-        <div class="stat-info">
-          <div class="stat-num">Anonymous</div>
-          <div class="stat-lbl">No account needed</div>
-        </div>
-      </div>
-      <div class="stat-chip">
-        <div class="stat-icon">📬</div>
-        <div class="stat-info">
-          <div class="stat-num">Read always</div>
-          <div class="stat-lbl">100% of responses</div>
-        </div>
-      </div>
-    </div>
+    <p class="hero-sub">Tell us what's working, what's broken, and what you wish existed.<br>Every response goes directly to the developer.</p>
   </div>
-
-  <!-- ── Main card grid ── -->
+  
   <div class="card-area">
-
-    <!-- Left: Mock form preview -->
-    <div class="preview-card reveal">
-      <div class="pc-header">
-        <div class="pc-eyebrow">📋 Google Form Preview</div>
-        <div class="pc-title">Gateonix Feedback</div>
-        <div class="pc-sub">A quick look at what the form asks. Click "Open Form" to fill it in.</div>
-      </div>
-
-      <div class="pc-body">
-
-        <!-- Q1: Rating -->
-        <div class="mock-q">
-          <div class="mock-q-label">Overall experience</div>
-          <div class="mock-stars" id="star-row">
-            <div class="star filled" data-v="1">★</div>
-            <div class="star filled" data-v="2">★</div>
-            <div class="star filled" data-v="3">★</div>
-            <div class="star filled" data-v="4">★</div>
-            <div class="star" data-v="5">★</div>
-          </div>
-        </div>
-
-        <!-- Q2: What did you use it for -->
-        <div class="mock-q">
-          <div class="mock-q-label">What did you use Gateonix for?</div>
-          <div class="mock-options">
-            <div class="mock-opt sel">Learning digital logic</div>
-            <div class="mock-opt">Coursework / assignment</div>
-            <div class="mock-opt">Personal project</div>
-            <div class="mock-opt">Teaching</div>
-            <div class="mock-opt">Just exploring</div>
-          </div>
-        </div>
-
-        <!-- Q3: Feature rating -->
-        <div class="mock-q">
-          <div class="mock-q-label">Most useful feature</div>
-          <div class="mock-options">
-            <div class="mock-opt">Real-time simulation</div>
-            <div class="mock-opt sel">Code export</div>
-            <div class="mock-opt">Waveform viewer</div>
-            <div class="mock-opt">Truth table</div>
-            <div class="mock-opt">Templates</div>
-          </div>
-        </div>
-
-        <!-- Q4: Suggestions -->
-        <div class="mock-q">
-          <div class="mock-q-label">Suggestions or bug reports</div>
-          <textarea class="mock-textarea" rows="3" placeholder="e.g. I wish the waveform panel could export to CSV…" readonly></textarea>
-        </div>
-
-      </div>
-
-      <div class="pc-footer">
-        <div class="pc-note">Powered by <span>Google Forms</span> · Responses are anonymous</div>
-        <div style="display:flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:10px;color:var(--muted);">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          Opens in new tab
-        </div>
-      </div>
+    <!-- Left Column: Live Feedback widget container -->
+    <div class="preview-card" style="padding: 24px; min-height: 600px;">
+      <h2 style="font-family: var(--font-mono); font-size: 14px; margin-bottom: 16px; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase;">Live Feedback Board</h2>
+      <p style="color: var(--muted); font-size: 14px; margin-bottom: 24px; line-height: 1.6;">Leave a quick note for the developer and other users. This feed is public and updates in real-time.</p>
+      
+      <!-- The embedded widget mounts here -->
+      <div id="gtx-fb-embed"></div>
     </div>
 
-    <!-- Right: CTA column -->
-    <div class="cta-col">
-
-      <!-- Main CTA -->
-      <div class="cta-main reveal">
-        <div class="cta-icon">💬</div>
-        <div class="cta-heading">Ready to share<br>your thoughts?</div>
-        <div class="cta-body">
-          The form takes about 2 minutes. Your answers help prioritise new features, squash bugs, and make Gateonix better for everyone — students, hobbyists, and teachers alike.
-        </div>
-        <a href="https://forms.gle/XgGWiEjZthShHaQHA" target="_blank" rel="noopener" class="btn-open-form">
-          Open Feedback Form
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="5" y1="12" x2="19" y2="12"/>
-            <polyline points="12 5 19 12 12 19"/>
-          </svg>
-        </a>
-        <a href="https://forms.gle/XgGWiEjZthShHaQHA" target="_blank" rel="noopener" class="btn-secondary-link">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          Direct link: forms.gle/XgGWiEjZthShHaQHA
-        </a>
+    <!-- Right Column: Google Form -->
+    <div class="info-stack">
+      <div class="info-card">
+        <div class="ic-icon">📝</div>
+        <h3 class="ic-title">Detailed Bug Reports</h3>
+        <p class="ic-desc">Found a complex bug? Have a long feature request? Use the detailed Google Form to submit long explanations and feedback privately.</p>
+        <br>
+        <a href="https://forms.gle/XgGWdEj2th5HWaQWA" target="_blank" rel="noopener noreferrer" class="nav-cta" style="display: inline-block; text-align: center;">Open Private Form →</a>
+      </div>
+      
+      <div class="info-card">
+        <div class="ic-icon">🔒</div>
+        <h3 class="ic-title">Completely anonymous</h3>
+        <p class="ic-desc">The live feed only asks for an optional name. The Google form does not collect your account info or email.</p>
       </div>
 
-      <!-- Info mini cards -->
-      <div class="info-mini reveal">
-        <div class="info-mini-icon" style="background:rgba(0,212,170,0.1);border:1px solid rgba(0,212,170,0.2);">🔒</div>
-        <div>
-          <div class="info-mini-title">Completely anonymous</div>
-          <div class="info-mini-desc">The form does not ask for your name or email. Google Forms does not collect your account info unless you're signed in and choose to include it.</div>
-        </div>
+      <div class="info-card">
+        <div class="ic-icon">⚡</div>
+        <h3 class="ic-title">Responses drive real changes</h3>
+        <p class="ic-desc">Past feedback led to the circuit validator, waveform step mode, and the code export panel. Your input shapes the roadmap directly.</p>
       </div>
-
-      <div class="info-mini reveal">
-        <div class="info-mini-icon" style="background:rgba(64,196,255,0.1);border:1px solid rgba(64,196,255,0.2);">⚡</div>
-        <div>
-          <div class="info-mini-title">Responses drive real changes</div>
-          <div class="info-mini-desc">Past feedback led to the circuit validator, waveform step mode, and the code export panel. Your input shapes the roadmap directly.</div>
-        </div>
-      </div>
-
     </div>
-
   </div>
+</main>
 
   <!-- ── Topics section ── -->
   <div class="topics-section reveal">
@@ -724,33 +628,12 @@
     resize(); initDots(); draw();
   })();
 
-  // ── Interactive star rating (preview only) ──────────────────
-  const stars = document.querySelectorAll('.star');
-  stars.forEach(star => {
-    star.addEventListener('mouseenter', () => {
-      const v = +star.dataset.v;
-      stars.forEach(s => s.classList.toggle('filled', +s.dataset.v <= v));
-    });
-    star.addEventListener('mouseleave', () => {
-      stars.forEach(s => s.classList.toggle('filled', +s.dataset.v <= 4));
-    });
-  });
-
-  // ── Interactive option toggles (preview only) ───────────────
-  document.querySelectorAll('.mock-opt').forEach(opt => {
-    opt.addEventListener('click', () => {
-      const parent = opt.closest('.mock-options');
-      // allow multiple in first group, single in second
-      const siblings = parent.querySelectorAll('.mock-opt');
-      opt.classList.toggle('sel');
-    });
-  });
-
-  // ── Scroll reveal ────────────────────────────────────────────
+  <!-- ── Scroll reveal ──────────────────────────────────────────── -->
   const obs = new IntersectionObserver(entries => {
     entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
   }, { threshold: 0.1 });
   document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
 </script>
+<script type="module" src="feedback-tab.js"></script>
 </body>
 </html>

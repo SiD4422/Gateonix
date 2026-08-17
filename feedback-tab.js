@@ -37,47 +37,81 @@ const isConfigured = Boolean(FIREBASE_CONFIG.apiKey) && FIREBASE_CONFIG.apiKey !
 // ---- DOM ----------------------------------------------------------------
 
 function buildWidget() {
+  const embedTarget = document.getElementById("gtx-fb-embed");
+  const isEmbed = !!embedTarget;
+
   const root = document.createElement("div");
-  root.className = "gtx-feedback-widget";
-  root.id = "gtx-feedback-widget";
-  root.dataset.open = "false";
+  root.className = isEmbed ? "gtx-feedback-embed" : "gtx-feedback-widget";
+  root.id = isEmbed ? "gtx-feedback-embed-root" : "gtx-feedback-widget";
+  root.dataset.open = isEmbed ? "true" : "false";
 
-  root.innerHTML = `
-    <button type="button" class="gtx-fb-tab" id="gtx-fb-tab-btn" aria-expanded="false" aria-controls="gtx-fb-panel">
-      <span class="gtx-fb-tab-dot" aria-hidden="true"></span>Feedback
-    </button>
-    <div class="gtx-fb-overlay" id="gtx-fb-overlay"></div>
-    <section class="gtx-fb-panel" id="gtx-fb-panel" role="dialog" aria-label="Feedback" aria-hidden="true">
-      <header class="gtx-fb-header">
-        <h2 class="gtx-fb-title"><span class="gtx-fb-tab-dot" aria-hidden="true"></span>Feedback channel</h2>
-        <button type="button" class="gtx-fb-close" id="gtx-fb-close-btn" aria-label="Close feedback panel">✕</button>
-      </header>
-      <form class="gtx-fb-form" id="gtx-fb-form" novalidate>
-        <div class="gtx-fb-field">
-          <input class="gtx-fb-input" id="gtx-fb-name" type="text" maxlength="${MAX_NAME_LEN}" placeholder="Name (optional)" autocomplete="off">
+  if (isEmbed) {
+    root.innerHTML = `
+      <section class="gtx-fb-panel" id="gtx-fb-panel">
+        <header class="gtx-fb-header">
+          <h2 class="gtx-fb-title"><span class="gtx-fb-tab-dot" aria-hidden="true"></span>Live Feedback</h2>
+        </header>
+        <form class="gtx-fb-form" id="gtx-fb-form" novalidate>
+          <div class="gtx-fb-field">
+            <input class="gtx-fb-input" id="gtx-fb-name" type="text" maxlength="${MAX_NAME_LEN}" placeholder="Name (optional)" autocomplete="off">
+          </div>
+          <div class="gtx-fb-field">
+            <textarea class="gtx-fb-textarea" id="gtx-fb-message" maxlength="${MAX_MESSAGE_LEN}" placeholder="Bug, idea, or a note about Gateonix…" required></textarea>
+          </div>
+          <div class="gtx-fb-hp" aria-hidden="true">
+            <label for="gtx-fb-website">Leave blank</label>
+            <input id="gtx-fb-website" name="website" type="text" tabindex="-1" autocomplete="off">
+          </div>
+          <div class="gtx-fb-form-row">
+            <span class="gtx-fb-counter" id="gtx-fb-counter">0 / ${MAX_MESSAGE_LEN}</span>
+            <button type="submit" class="gtx-fb-send" id="gtx-fb-send-btn">Send ▸</button>
+          </div>
+          <p class="gtx-fb-form-msg" id="gtx-fb-form-msg" role="status" hidden></p>
+        </form>
+        <div class="gtx-fb-feed" id="gtx-fb-feed">
+          <p class="gtx-fb-status" id="gtx-fb-status">Connecting…</p>
         </div>
-        <div class="gtx-fb-field">
-          <textarea class="gtx-fb-textarea" id="gtx-fb-message" maxlength="${MAX_MESSAGE_LEN}" placeholder="Bug, idea, or a note about Gateonix…" required></textarea>
+      </section>
+    `;
+    embedTarget.appendChild(root);
+  } else {
+    root.innerHTML = `
+      <button type="button" class="gtx-fb-tab" id="gtx-fb-tab-btn" aria-expanded="false" aria-controls="gtx-fb-panel">
+        <span class="gtx-fb-tab-dot" aria-hidden="true"></span>Feedback
+      </button>
+      <div class="gtx-fb-overlay" id="gtx-fb-overlay"></div>
+      <section class="gtx-fb-panel" id="gtx-fb-panel" role="dialog" aria-label="Feedback" aria-hidden="true">
+        <header class="gtx-fb-header">
+          <h2 class="gtx-fb-title"><span class="gtx-fb-tab-dot" aria-hidden="true"></span>Feedback channel</h2>
+          <button type="button" class="gtx-fb-close" id="gtx-fb-close-btn" aria-label="Close feedback panel">✕</button>
+        </header>
+        <form class="gtx-fb-form" id="gtx-fb-form" novalidate>
+          <div class="gtx-fb-field">
+            <input class="gtx-fb-input" id="gtx-fb-name" type="text" maxlength="${MAX_NAME_LEN}" placeholder="Name (optional)" autocomplete="off">
+          </div>
+          <div class="gtx-fb-field">
+            <textarea class="gtx-fb-textarea" id="gtx-fb-message" maxlength="${MAX_MESSAGE_LEN}" placeholder="Bug, idea, or a note about Gateonix…" required></textarea>
+          </div>
+          <div class="gtx-fb-hp" aria-hidden="true">
+            <label for="gtx-fb-website">Leave blank</label>
+            <input id="gtx-fb-website" name="website" type="text" tabindex="-1" autocomplete="off">
+          </div>
+          <div class="gtx-fb-form-row">
+            <span class="gtx-fb-counter" id="gtx-fb-counter">0 / ${MAX_MESSAGE_LEN}</span>
+            <button type="submit" class="gtx-fb-send" id="gtx-fb-send-btn">Send ▸</button>
+          </div>
+          <p class="gtx-fb-form-msg" id="gtx-fb-form-msg" role="status" hidden></p>
+        </form>
+        <div class="gtx-fb-feed" id="gtx-fb-feed">
+          <p class="gtx-fb-status" id="gtx-fb-status">Connecting…</p>
         </div>
-        <div class="gtx-fb-hp" aria-hidden="true">
-          <label for="gtx-fb-website">Leave blank</label>
-          <input id="gtx-fb-website" name="website" type="text" tabindex="-1" autocomplete="off">
-        </div>
-        <div class="gtx-fb-form-row">
-          <span class="gtx-fb-counter" id="gtx-fb-counter">0 / ${MAX_MESSAGE_LEN}</span>
-          <button type="submit" class="gtx-fb-send" id="gtx-fb-send-btn">Send ▸</button>
-        </div>
-        <p class="gtx-fb-form-msg" id="gtx-fb-form-msg" role="status" hidden></p>
-      </form>
-      <div class="gtx-fb-feed" id="gtx-fb-feed">
-        <p class="gtx-fb-status" id="gtx-fb-status">Connecting…</p>
-      </div>
-    </section>
-  `;
+      </section>
+    `;
+    document.body.appendChild(root);
+  }
 
-  document.body.appendChild(root);
   guardSubmit(root);
-  return root;
+  return { root, isEmbed };
 }
 
 // Always intercept the form, even before Firebase has connected — otherwise
@@ -98,7 +132,13 @@ function guardSubmit(root) {
 
 // ---- open / close ---------------------------------------------------------
 
-function initInteractions(root) {
+function initInteractions({ root, isEmbed }) {
+  if (isEmbed) {
+    // Already open and connected on page load
+    connectFeedback(root);
+    return;
+  }
+
   const tabBtn = root.querySelector("#gtx-fb-tab-btn");
   const closeBtn = root.querySelector("#gtx-fb-close-btn");
   const overlay = root.querySelector("#gtx-fb-overlay");
@@ -335,9 +375,9 @@ function setLastSubmitTs(ts) {
 // ---- init -----------------------------------------------------------------
 
 function init() {
-  if (document.getElementById("gtx-feedback-widget")) return;
-  const root = buildWidget();
-  initInteractions(root);
+  if (document.getElementById("gtx-feedback-widget") || document.getElementById("gtx-feedback-embed-root")) return;
+  const config = buildWidget();
+  initInteractions(config);
 }
 
 if (document.readyState === "loading") {

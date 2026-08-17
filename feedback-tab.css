@@ -456,9 +456,12 @@
 .gtx-feedback-embed .gtx-fb-panel {
   position: static;
   width: 100%;
-  height: 600px;
-  max-height: 80vh;
   transform: none;
-  border: 1px solid var(--gtx-fb-copper-dim);
-  border-radius: 14px;
+  border: none;
+  background: transparent;
+}
+
+.gtx-feedback-embed .gtx-fb-feed {
+  max-height: none; /* allow feed to flow naturally down page */
+  overflow: visible;
 }

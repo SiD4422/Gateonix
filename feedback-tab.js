@@ -200,12 +200,14 @@ async function connectFeedback(root) {
       import(/* @vite-ignore */ `https://www.gstatic.com/firebasejs/${FIREBASE_SDK_VERSION}/firebase-app.js`),
       import(/* @vite-ignore */ `https://www.gstatic.com/firebasejs/${FIREBASE_SDK_VERSION}/firebase-firestore.js`),
     ]);
-    const { getFirestore, collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp } = firestore;
+    const { getFirestore, collection, addDoc, query, limit, onSnapshot, serverTimestamp, where } = firestore;
 
     const app = initializeApp(FIREBASE_CONFIG);
     const db = getFirestore(app);
     const feedbackCol = collection(db, COLLECTION_NAME);
-    const feedQuery = query(feedbackCol, orderBy("createdAt", "desc"), limit(FEED_LIMIT));
+    
+    // Query only this user's messages (avoids needing a composite index by dropping orderBy)
+    const feedQuery = query(feedbackCol, where("sessionId", "==", SESSION_ID), limit(FEED_LIMIT));
 
     const seen = new Set();
     let firstLoad = true;
@@ -214,6 +216,14 @@ async function connectFeedback(root) {
       feedQuery,
       (snap) => {
         const entries = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        
+        // Sort client-side so we don't force the user to create a Firestore composite index
+        entries.sort((a, b) => {
+          const tA = a.createdAt ? (typeof a.createdAt.toMillis === 'function' ? a.createdAt.toMillis() : 0) : 0;
+          const tB = b.createdAt ? (typeof b.createdAt.toMillis === 'function' ? b.createdAt.toMillis() : 0) : 0;
+          return tB - tA;
+        });
+
         renderFeed(feedEl, entries, seen, firstLoad);
         firstLoad = false;
       },
@@ -249,7 +259,8 @@ function renderFeed(feedEl, entries, seen, firstLoad) {
   for (const entry of sorted) {
     seen.add(entry.id);
 
-    const isMine = entry.sessionId === SESSION_ID;
+    // It's "mine" if it belongs to this session AND wasn't sent by the developer
+    const isMine = entry.sessionId === SESSION_ID && entry.isDeveloper !== true;
     const card = document.createElement("div");
     card.className = isMine ? "gtx-chat-bubble-right" : "gtx-chat-bubble-left";
 

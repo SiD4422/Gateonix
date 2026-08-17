@@ -22,15 +22,15 @@
 
 .gtx-feedback-widget,
 .gtx-feedback-embed {
-  --gtx-fb-bg-deep: #0b1a14;
-  --gtx-fb-bg-panel: #10241c;
-  --gtx-fb-bg-raise: #16301f;
-  --gtx-fb-silk: #eef4ee;
-  --gtx-fb-silk-dim: #93a89b;
-  --gtx-fb-copper: #c68a3d;
-  --gtx-fb-copper-dim: #7a5b2c;
-  --gtx-fb-led: #ff6a48;
-  --gtx-fb-trace: #4fae7c;
+  --gtx-fb-bg-deep: #080a0e;
+  --gtx-fb-bg-panel: #0f1218;
+  --gtx-fb-bg-raise: #161b24;
+  --gtx-fb-silk: #f8fafc;
+  --gtx-fb-silk-dim: #94a3b8;
+  --gtx-fb-copper: #00d4aa;
+  --gtx-fb-copper-dim: #1e293b;
+  --gtx-fb-led: #00d4aa;
+  --gtx-fb-trace: #00d4aa;
   --gtx-fb-font-mono: ui-monospace, "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
   --gtx-fb-font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color-scheme: dark;
@@ -149,7 +149,7 @@
   width: 100%;
   max-width: 600px;
   height: 600px;
-  margin: 0 auto;
+  margin: 40px auto;
 }
 
 /* ---------- chat header ---------- */

@@ -47,27 +47,137 @@ function buildWidget() {
 
   if (isEmbed) {
     root.innerHTML = `
-      <section class="gtx-fb-panel" id="gtx-fb-panel">
-        <header class="gtx-fb-header">
-          <h2 class="gtx-fb-title"><span class="gtx-fb-tab-dot" aria-hidden="true"></span>Live Feedback</h2>
-        </header>
-        <form class="gtx-fb-form" id="gtx-fb-form" novalidate>
-          <div class="gtx-fb-field">
-            <input class="gtx-fb-input" id="gtx-fb-name" type="text" maxlength="${MAX_NAME_LEN}" placeholder="Name (optional)" autocomplete="off">
+      <section class="gtx-fb-panel template-2col" id="gtx-fb-panel">
+        <div class="gtx-fb-template-wrapper">
+          <div class="gtx-fb-sidebar">
+            <div class="gtx-fb-sb-icon">💬</div>
+            <h2 class="gtx-fb-sb-title">We value your <span>feedback</span></h2>
+            <p class="gtx-fb-sb-desc">Your opinion helps us build better products and provide a better experience for everyone.</p>
+            <div class="gtx-fb-sb-points">
+              <div class="gtx-fb-point">
+                <div class="gtx-fb-point-icon">🛡️</div>
+                <div class="gtx-fb-point-text">
+                  <h4>Your feedback is secure</h4>
+                  <p>We keep your responses private and safe.</p>
+                </div>
+              </div>
+              <div class="gtx-fb-point">
+                <div class="gtx-fb-point-icon">⚡</div>
+                <div class="gtx-fb-point-text">
+                  <h4>It only takes a minute</h4>
+                  <p>Quick and easy feedback process.</p>
+                </div>
+              </div>
+              <div class="gtx-fb-point">
+                <div class="gtx-fb-point-icon">🎯</div>
+                <div class="gtx-fb-point-text">
+                  <h4>Make an impact</h4>
+                  <p>Your feedback drives real improvements.</p>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="gtx-fb-field">
-            <textarea class="gtx-fb-textarea" id="gtx-fb-message" maxlength="${MAX_MESSAGE_LEN}" placeholder="Bug, idea, or a note about Gateonix…" required></textarea>
+          
+          <div class="gtx-fb-main">
+            <div class="gtx-fb-main-header">
+              <div class="icon">💬</div>
+              <div>
+                <h3>Share your feedback</h3>
+                <p>Help us improve by sharing your experience</p>
+              </div>
+            </div>
+            
+            <form class="gtx-fb-form" id="gtx-fb-form" novalidate style="padding:0; border:none; margin:0;">
+              <div class="gtx-fb-row-2">
+                <div class="gtx-fb-field">
+                  <label class="gtx-fb-lbl" for="gtx-fb-category">What is your feedback about? <span>*</span></label>
+                  <select class="gtx-fb-select" id="gtx-fb-category" required>
+                    <option value="">Select a category</option>
+                    <option value="Bug">Bug Report</option>
+                    <option value="Feature">Feature Request</option>
+                    <option value="Praise">Praise</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div class="gtx-fb-field">
+                  <label class="gtx-fb-lbl">Overall experience <span>*</span></label>
+                  <div class="gtx-fb-stars" id="gtx-fb-stars-group">
+                    <span class="gtx-fb-star" data-val="1">☆</span>
+                    <span class="gtx-fb-star" data-val="2">☆</span>
+                    <span class="gtx-fb-star" data-val="3">☆</span>
+                    <span class="gtx-fb-star" data-val="4">☆</span>
+                    <span class="gtx-fb-star" data-val="5">☆</span>
+                  </div>
+                  <span class="gtx-fb-star-caption">Click to rate</span>
+                  <input type="hidden" id="gtx-fb-rating" value="0">
+                </div>
+              </div>
+
+              <div class="gtx-fb-field" style="margin-top: 24px;">
+                <label class="gtx-fb-lbl" for="gtx-fb-message">Tell us more <span>*</span></label>
+                <textarea class="gtx-fb-textarea" id="gtx-fb-message" maxlength="${MAX_MESSAGE_LEN}" placeholder="What did you like or dislike? Any suggestions?" required></textarea>
+                <div class="gtx-fb-form-row" style="justify-content: flex-end;">
+                  <span class="gtx-fb-counter" id="gtx-fb-counter">0 / ${MAX_MESSAGE_LEN}</span>
+                </div>
+              </div>
+
+              <div class="gtx-fb-field" style="margin-top: 24px;">
+                <label class="gtx-fb-lbl">How likely are you to recommend us to others?</label>
+                <div class="gtx-fb-nps-row" id="gtx-fb-nps-group">
+                  <button type="button" class="gtx-fb-nps-btn" data-val="0">0</button>
+                  <button type="button" class="gtx-fb-nps-btn" data-val="1">1</button>
+                  <button type="button" class="gtx-fb-nps-btn" data-val="2">2</button>
+                  <button type="button" class="gtx-fb-nps-btn" data-val="3">3</button>
+                  <button type="button" class="gtx-fb-nps-btn" data-val="4">4</button>
+                  <button type="button" class="gtx-fb-nps-btn" data-val="5">5</button>
+                  <button type="button" class="gtx-fb-nps-btn" data-val="6">6</button>
+                  <button type="button" class="gtx-fb-nps-btn" data-val="7">7</button>
+                  <button type="button" class="gtx-fb-nps-btn" data-val="8">8</button>
+                  <button type="button" class="gtx-fb-nps-btn" data-val="9">9</button>
+                  <button type="button" class="gtx-fb-nps-btn" data-val="10">10</button>
+                </div>
+                <div class="gtx-fb-nps-labels">
+                  <span>Not likely</span>
+                  <span>Very likely</span>
+                </div>
+                <input type="hidden" id="gtx-fb-nps" value="-1">
+              </div>
+
+              <div class="gtx-fb-toggle-row" style="margin-top: 24px;">
+                <div class="gtx-fb-toggle-lbl">
+                  <h4>May we contact you for more details?</h4>
+                  <p>Optional - your contact info will not be shared</p>
+                </div>
+                <label class="gtx-fb-switch">
+                  <input type="checkbox" id="gtx-fb-contact">
+                  <span class="gtx-fb-slider"></span>
+                </label>
+              </div>
+
+              <div class="gtx-fb-row-2" style="margin-top: 16px;">
+                <div class="gtx-fb-field">
+                  <input class="gtx-fb-input" id="gtx-fb-name" type="text" maxlength="${MAX_NAME_LEN}" placeholder="👤 Your name (optional)" autocomplete="off">
+                </div>
+                <div class="gtx-fb-field">
+                  <input class="gtx-fb-input" id="gtx-fb-email" type="email" placeholder="✉️ Email address (optional)" autocomplete="off">
+                </div>
+              </div>
+
+              <div class="gtx-fb-hp" aria-hidden="true">
+                <label for="gtx-fb-website">Leave blank</label>
+                <input id="gtx-fb-website" name="website" type="text" tabindex="-1" autocomplete="off">
+              </div>
+
+              <button type="submit" class="gtx-fb-submit-lg" id="gtx-fb-send-btn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                Submit Feedback
+              </button>
+              <p class="gtx-fb-submit-note" style="margin-top: 12px;">🔒 Thank you! Your feedback makes a difference.</p>
+              <p class="gtx-fb-form-msg" id="gtx-fb-form-msg" role="status" hidden></p>
+            </form>
           </div>
-          <div class="gtx-fb-hp" aria-hidden="true">
-            <label for="gtx-fb-website">Leave blank</label>
-            <input id="gtx-fb-website" name="website" type="text" tabindex="-1" autocomplete="off">
-          </div>
-          <div class="gtx-fb-form-row">
-            <span class="gtx-fb-counter" id="gtx-fb-counter">0 / ${MAX_MESSAGE_LEN}</span>
-            <button type="submit" class="gtx-fb-send" id="gtx-fb-send-btn">Send ▸</button>
-          </div>
-          <p class="gtx-fb-form-msg" id="gtx-fb-form-msg" role="status" hidden></p>
-        </form>
+        </div>
+
         <div class="gtx-fb-feed" id="gtx-fb-feed">
           <p class="gtx-fb-status" id="gtx-fb-status">Connecting…</p>
         </div>
@@ -134,6 +244,36 @@ function guardSubmit(root) {
 
 function initInteractions({ root, isEmbed }) {
   if (isEmbed) {
+    // Bind interactive elements
+    const stars = root.querySelectorAll('.gtx-fb-star');
+    const ratingInput = root.querySelector('#gtx-fb-rating');
+    stars.forEach(star => {
+      star.addEventListener('click', () => {
+        const val = parseInt(star.dataset.val, 10);
+        ratingInput.value = val;
+        stars.forEach(s => {
+          if (parseInt(s.dataset.val, 10) <= val) {
+            s.classList.add('active');
+            s.textContent = '★';
+          } else {
+            s.classList.remove('active');
+            s.textContent = '☆';
+          }
+        });
+      });
+    });
+
+    const npsBtns = root.querySelectorAll('.gtx-fb-nps-btn');
+    const npsInput = root.querySelector('#gtx-fb-nps');
+    npsBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const val = btn.dataset.val;
+        npsInput.value = val;
+        npsBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+
     // Already open and connected on page load
     connectFeedback(root);
     return;
@@ -258,11 +398,42 @@ function renderFeed(feedEl, entries, seen, firstLoad) {
 
     meta.append(name, time);
 
+    let extras = null;
+    if (entry.category || entry.rating) {
+      extras = document.createElement("div");
+      extras.className = "gtx-fb-entry-extras";
+      extras.style.display = "flex";
+      extras.style.gap = "8px";
+      extras.style.marginBottom = "8px";
+      extras.style.fontSize = "11px";
+      extras.style.fontFamily = "var(--gtx-fb-font-mono)";
+
+      if (entry.category) {
+        const cat = document.createElement("span");
+        cat.style.padding = "2px 6px";
+        cat.style.background = "rgba(140,120,240,0.1)";
+        cat.style.color = "#8c78f0";
+        cat.style.borderRadius = "4px";
+        cat.textContent = entry.category;
+        extras.appendChild(cat);
+      }
+      if (entry.rating) {
+        const r = document.createElement("span");
+        r.style.color = "#8c78f0";
+        r.textContent = "★".repeat(entry.rating) + "☆".repeat(5 - entry.rating);
+        extras.appendChild(r);
+      }
+    }
+
     const msg = document.createElement("p");
     msg.className = "gtx-fb-entry-msg";
     msg.textContent = entry.message || "";
 
-    card.append(meta, msg);
+    if (extras) {
+      card.append(meta, extras, msg);
+    } else {
+      card.append(meta, msg);
+    }
     feedEl.appendChild(card);
   }
 
@@ -296,27 +467,20 @@ function disableForm(form, reason) {
 // ---- submit ---------------------------------------------------------------
 
 function wireSubmit(form, feedbackCol, addDoc, serverTimestamp) {
-  const nameInput = form.querySelector("#gtx-fb-name");
-  const msgInput = form.querySelector("#gtx-fb-message");
   const hpInput = form.querySelector("#gtx-fb-website");
-  const counter = form.querySelector("#gtx-fb-counter");
   const sendBtn = form.querySelector("#gtx-fb-send-btn");
   const formMsg = form.querySelector("#gtx-fb-form-msg");
-
-  msgInput.addEventListener("input", () => {
-    const len = msgInput.value.length;
-    counter.textContent = `${len} / ${MAX_MESSAGE_LEN}`;
-    counter.dataset.nearLimit = String(len > MAX_MESSAGE_LEN * 0.9);
-  });
+  const msgInput = form.querySelector("#gtx-fb-message");
+  const counter = form.querySelector("#gtx-fb-counter");
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     formMsg.hidden = true;
 
-    if (hpInput.value) return; // honeypot tripped — drop silently, no error shown to the bot
+    if (hpInput.value) return; // honeypot tripped
 
-    const message = msgInput.value.trim();
-    if (!message) {
+    const data = getFormData(form);
+    if (!data.message) {
       showFormMsg(formMsg, "Write a message first.", "error");
       return;
     }
@@ -328,24 +492,46 @@ function wireSubmit(form, feedbackCol, addDoc, serverTimestamp) {
     }
 
     sendBtn.disabled = true;
-    sendBtn.textContent = "Sending…";
+    sendBtn.innerHTML = "Sending…";
 
     try {
-      await addDoc(feedbackCol, {
-        name: nameInput.value.trim().slice(0, MAX_NAME_LEN),
-        message: message.slice(0, MAX_MESSAGE_LEN),
+      const payload = {
+        message: data.message.slice(0, MAX_MESSAGE_LEN),
         createdAt: serverTimestamp(),
-      });
+      };
+      // Only attach extra fields if they are present/modified
+      if (data.name && data.name !== "Anonymous") payload.name = data.name.slice(0, MAX_NAME_LEN);
+      if (data.category) payload.category = data.category;
+      if (data.rating > 0) payload.rating = data.rating;
+      if (data.nps >= 0) payload.nps = data.nps;
+      if (data.contact) payload.contact = true;
+      if (data.email) payload.email = data.email;
+
+      await addDoc(feedbackCol, payload);
       setLastSubmitTs(Date.now());
-      msgInput.value = "";
-      counter.textContent = `0 / ${MAX_MESSAGE_LEN}`;
+      
+      // Reset form
+      if (msgInput) msgInput.value = "";
+      if (counter) counter.textContent = `0 / ${MAX_MESSAGE_LEN}`;
+      // Reset stars
+      form.querySelectorAll('.gtx-fb-star').forEach(s => { s.classList.remove('active'); s.textContent = '☆'; });
+      const ratingInput = form.querySelector('#gtx-fb-rating');
+      if (ratingInput) ratingInput.value = "0";
+      // Reset NPS
+      form.querySelectorAll('.gtx-fb-nps-btn').forEach(b => b.classList.remove('active'));
+      const npsInput = form.querySelector('#gtx-fb-nps');
+      if (npsInput) npsInput.value = "-1";
+      // Reset select
+      const cat = form.querySelector('#gtx-fb-category');
+      if (cat) cat.value = "";
+      
       showFormMsg(formMsg, "Sent — thanks for the signal.", "ok");
     } catch (err) {
       console.error("Gateonix feedback: submit failed", err);
       showFormMsg(formMsg, "Couldn't send. Try again.", "error");
     } finally {
       sendBtn.disabled = false;
-      sendBtn.textContent = "Send ▸";
+      sendBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg> Submit Feedback`;
     }
   });
 }

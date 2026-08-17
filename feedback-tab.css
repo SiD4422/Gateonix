@@ -272,6 +272,8 @@
   font-size: 14.5px;
   line-height: 1.45;
   word-wrap: break-word;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .gtx-chat-bubble-left .gtx-chat-bubble-inner {

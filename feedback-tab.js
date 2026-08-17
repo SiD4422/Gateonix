@@ -348,6 +348,14 @@ function wireSubmit(form, feedbackCol, addDoc, serverTimestamp) {
 
     sendBtn.disabled = true;
 
+    const oldMsg = msgInput.value;
+    // Optimistically clear the form to make it feel instantly responsive
+    if (msgInput) {
+      msgInput.value = "";
+      msgInput.style.height = "auto";
+    }
+    setLastSubmitTs(Date.now());
+
     try {
       const payload = {
         message: message.slice(0, MAX_MESSAGE_LEN),
@@ -359,16 +367,12 @@ function wireSubmit(form, feedbackCol, addDoc, serverTimestamp) {
       if (name) payload.name = name.slice(0, MAX_NAME_LEN);
 
       await addDoc(feedbackCol, payload);
-      setLastSubmitTs(Date.now());
-      
-      // Reset form
-      if (msgInput) {
-        msgInput.value = "";
-        msgInput.style.height = 'auto'; // reset textarea height
-      }
       
     } catch (err) {
       console.error("Gateonix feedback: submit failed", err);
+      // Restore input if it failed
+      if (msgInput) msgInput.value = oldMsg;
+      setLastSubmitTs(0);
       showFormMsg(formMsg, "Couldn't send. Try again.", "error");
     } finally {
       sendBtn.disabled = false;

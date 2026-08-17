@@ -20,7 +20,8 @@
            the feed entry it lands in.
    ========================================================================= */
 
-.gtx-feedback-widget {
+.gtx-feedback-widget,
+.gtx-feedback-embed {
   --gtx-fb-bg-deep: #0b1a14;
   --gtx-fb-bg-panel: #10241c;
   --gtx-fb-bg-raise: #16301f;
@@ -35,7 +36,8 @@
   color-scheme: dark;
 }
 
-.gtx-feedback-widget * {
+.gtx-feedback-widget *,
+.gtx-feedback-embed * {
   box-sizing: border-box;
 }
 

@@ -40,7 +40,7 @@ function drawPin(ctx, x, y, val) {
 function drawGate(ctx, g, sigVals, selectedId) {
   const def  = GATE_DEFS[g.type];
   const col  = CAT_COLORS[def.cat];
-  const isSel = g.id === selectedId;
+  const isSel = (selectedId instanceof Set) ? selectedId.has(g.id) : g.id === selectedId;
   const x = g.x, y = g.y, w = def.w, h = def.h;
 
   // ── Validation highlight — strokes only, zero shadowBlur ──────

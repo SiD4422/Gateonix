@@ -12,7 +12,8 @@ document.getElementById('btn-logout').addEventListener('click', () => {
 // ===== STATE =====
 let gates       = [];
 let connections = [];
-let selected    = null;
+let selected    = null;          // primary selection (last clicked gate id) or null
+let selectedIds = new Set();     // full multi-selection
 let nextId      = 1;
 window._conns   = connections; // used by canvas.js for pin value lookup
 
@@ -23,6 +24,26 @@ let isPanning   = false;
 let panStart    = { x:0, y:0 };
 
 const view = { zoom:1, panX:0, panY:0 };
+
+let marquee = null;   // {x0,y0,x1,y1,base:Set,additive:bool} in world coords
+
+// ===== SELECTION HELPERS =====
+function clearSelection(){ selectedIds.clear(); selected=null; }
+function selectOnly(id){ selectedIds=new Set([id]); selected=id; }
+function toggleSelection(id){
+  if(selectedIds.has(id)){
+    selectedIds.delete(id);
+    if(selected===id) selected = selectedIds.size ? [...selectedIds][selectedIds.size-1] : null;
+  } else {
+    selectedIds.add(id); selected=id;
+  }
+}
+function selectAll(){
+  selectedIds=new Set(gates.map(g=>g.id));
+  selected = gates.length ? gates[gates.length-1].id : null;
+}
+// Used by other panels (e.g. code panel validation list) to focus a gate
+window.selectGate = function(id){ selectOnly(id); render(); updateProps(); };
 
 const undoStack = [], redoStack = [];
 let clockOn     = false;
@@ -98,9 +119,22 @@ function render() {
   }
 
   // gates
-  gates.forEach(g => drawGate(ctx, g, sigVals, selected));
+  gates.forEach(g => drawGate(ctx, g, sigVals, selectedIds));
 
   ctx.restore();
+
+  // selection marquee (screen space)
+  if(marquee){
+    const a=w2s(Math.min(marquee.x0,marquee.x1), Math.min(marquee.y0,marquee.y1));
+    const b=w2s(Math.max(marquee.x0,marquee.x1), Math.max(marquee.y0,marquee.y1));
+    ctx.save();
+    ctx.fillStyle='rgba(0,212,170,0.10)';
+    ctx.strokeStyle='#00d4aa'; ctx.lineWidth=1; ctx.setLineDash([4,3]);
+    ctx.fillRect(a.x,a.y,b.x-a.x,b.y-a.y);
+    ctx.strokeRect(a.x+0.5,a.y+0.5,b.x-a.x,b.y-a.y);
+    ctx.restore();
+  }
+
   drawMinimap(mCtx, gates, connections, sigVals, view, W, H, 140, 88);
 }
 
@@ -122,7 +156,7 @@ function redo() {
 }
 function apply(s) {
   gates=s.gates; connections=s.connections; nextId=s.nextId;
-  window._conns=connections; selected=null;
+  window._conns=connections; clearSelection();
   simulate(); render(); updateProps(); renderCircuitTruthTable();
 }
 
@@ -131,6 +165,12 @@ function setStatus(msg) { statusEl.textContent = msg; }
 
 // ===== PROPERTIES PANEL =====
 function updateProps() {
+  if(selectedIds.size>1) {
+    propArea.innerHTML = `<div class="prop-sec"><div class="prop-sec-title">Selection</div>
+      <div class="prop-row"><span class="prop-lbl">Gates</span><span class="prop-val">${selectedIds.size}</span></div>
+      </div><div class="prop-empty">Drag to move them together<br>Delete to remove them</div>`;
+    ttType.textContent = ''; ttWrap.innerHTML = ''; return;
+  }
   if(!selected) {
     propArea.innerHTML = '<div class="prop-empty">Select a gate<br>to inspect properties</div>';
     ttType.textContent = ''; ttWrap.innerHTML = ''; return;
@@ -266,27 +306,38 @@ mainCanvas.addEventListener('mousedown', e=>{
 
   // ── Gate body — select + prepare drag (don't start drag until mousemove) ──
   const g=[...gates].reverse().find(g=>hitGate(pos.x,pos.y,g));
+  const toggleMod = e.shiftKey||e.ctrlKey||e.metaKey;
   if(g){
     const nearPin = screenPinHit(e,'in') || screenPinHit(e,'out');
-    selected=g.id;
+    if(toggleMod){
+      toggleSelection(g.id);
+      setStatus(`${selectedIds.size} gate${selectedIds.size===1?'':'s'} selected`);
+      simulate();render();updateProps();renderCircuitTruthTable(); return;
+    }
+    // Plain click on an already multi-selected gate keeps the group (so it can be dragged)
+    if(!selectedIds.has(g.id)) selectOnly(g.id);
+    else selected=g.id;
     dragging=g; dragOffset={x:pos.x-g.x,y:pos.y-g.y};
     _dragStartPos={x:pos.x,y:pos.y};
+    _dragOrigins=gates.filter(q=>selectedIds.has(q.id)).map(q=>({g:q,x:q.x,y:q.y}));
     _didDrag=false;
-    if(g.type==='INPUT' && !nearPin){
+    if(g.type==='INPUT' && !nearPin && selectedIds.size===1){
       snapshot(); g.value=g.value?0:1;
       setStatus(`Input #${g.id} → ${g.value}`);
     }
     simulate();render();updateProps();renderCircuitTruthTable();
   } else {
-    selected=null;
-    isPanning=true; mainCanvas.style.cursor='grabbing';
-    panStart={x:e.clientX-view.panX, y:e.clientY-view.panY};
+    // Empty canvas → rubber-band selection box (Alt-drag or middle-drag pans)
+    marquee={x0:pos.x,y0:pos.y,x1:pos.x,y1:pos.y,
+             additive:toggleMod, base:new Set(selectedIds)};
+    if(!toggleMod) clearSelection();
     simulate();render();updateProps();
   }
 });
 
 let _didDrag = false; // track if gate actually moved during drag
 let _dragStartPos = null; // world pos where drag started
+let _dragOrigins  = [];   // starting positions of every selected gate
 const DRAG_THRESHOLD = 4; // world units before drag activates
 
 mainCanvas.addEventListener('mousemove', e=>{
@@ -294,6 +345,10 @@ mainCanvas.addEventListener('mousemove', e=>{
     view.panX=e.clientX-panStart.x; view.panY=e.clientY-panStart.y; render(); return;
   }
   const pos=getPos(e);
+  if(marquee){
+    marquee.x1=pos.x; marquee.y1=pos.y;
+    applyMarquee(); render(); updateProps(); return;
+  }
   if(dragging){
     // Only start moving once mouse has crossed threshold
     if(!_didDrag && _dragStartPos){
@@ -302,7 +357,9 @@ mainCanvas.addEventListener('mousemove', e=>{
     }
     const nx=snapV(pos.x-dragOffset.x), ny=snapV(pos.y-dragOffset.y);
     _didDrag=true;
-    dragging.x=nx; dragging.y=ny;
+    const dx=nx-dragging.x, dy=ny-dragging.y;
+    if(_dragOrigins.length>1) _dragOrigins.forEach(o=>{ o.g.x+=dx; o.g.y+=dy; });
+    else { dragging.x=nx; dragging.y=ny; }
     simulate();render();
   }
   else if(pendingWire){ pendingWire._mouse=pos; render(); }
@@ -314,10 +371,34 @@ mainCanvas.addEventListener('mousemove', e=>{
   }
 });
 
+// Recompute selection from the current marquee rectangle
+function applyMarquee(){
+  if(!marquee) return;
+  const x0=Math.min(marquee.x0,marquee.x1), x1=Math.max(marquee.x0,marquee.x1);
+  const y0=Math.min(marquee.y0,marquee.y1), y1=Math.max(marquee.y0,marquee.y1);
+  const hits=gates.filter(g=>{
+    const def=GATE_DEFS[g.type];
+    return g.x < x1 && g.x+def.w > x0 && g.y < y1 && g.y+def.h > y0;
+  });
+  selectedIds = marquee.additive ? new Set(marquee.base) : new Set();
+  hits.forEach(g=>selectedIds.add(g.id));
+  selected = hits.length ? hits[hits.length-1].id
+                         : (selectedIds.size ? [...selectedIds][selectedIds.size-1] : null);
+}
+
 mainCanvas.addEventListener('mouseup', ()=>{
+  if(marquee){
+    const moved=Math.abs(marquee.x1-marquee.x0)>2||Math.abs(marquee.y1-marquee.y0)>2;
+    applyMarquee(); marquee=null;
+    if(moved) setStatus(`${selectedIds.size} gate${selectedIds.size===1?'':'s'} selected`);
+    render(); updateProps(); renderCircuitTruthTable();
+  }
   if(dragging && _didDrag){ snapshot(); }
-  dragging=null; isPanning=false; _didDrag=false; _dragStartPos=null;
+  dragging=null; isPanning=false; _didDrag=false; _dragStartPos=null; _dragOrigins=[];
   if(!pendingWire) mainCanvas.style.cursor='';
+});
+mainCanvas.addEventListener('mouseleave', ()=>{
+  if(marquee){ applyMarquee(); marquee=null; render(); updateProps(); }
 });
 
 mainCanvas.addEventListener('wheel', e=>{
@@ -332,10 +413,18 @@ mainCanvas.addEventListener('wheel', e=>{
 },{passive:false});
 
 window.addEventListener('keydown', e=>{
-  if(e.key==='Escape'){ pendingWire=null; mainCanvas.style.cursor=''; render(); }
+  const typing = document.activeElement && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName);
+  if(e.key==='Escape'){
+    pendingWire=null; mainCanvas.style.cursor='';
+    marquee=null; clearSelection(); render(); updateProps();
+  }
+  if((e.ctrlKey||e.metaKey)&&(e.key==='a'||e.key==='A')&&!typing){
+    e.preventDefault(); selectAll(); render(); updateProps(); renderCircuitTruthTable();
+    setStatus(`${selectedIds.size} gate${selectedIds.size===1?'':'s'} selected`);
+  }
   if((e.ctrlKey||e.metaKey)&&e.key==='z'&&!e.shiftKey){ e.preventDefault();undo(); }
   if((e.ctrlKey||e.metaKey)&&(e.key==='y'||(e.shiftKey&&e.key==='z'))){ e.preventDefault();redo(); }
-  if((e.key==='Delete'||e.key==='Backspace')&&selected&&document.activeElement===document.body) deleteSelected();
+  if((e.key==='Delete'||e.key==='Backspace')&&selectedIds.size&&document.activeElement===document.body) deleteSelected();
 });
 
 // ===== DRAG FROM PANEL =====
@@ -357,17 +446,19 @@ document.getElementById('canvas-area').addEventListener('drop', e=>{
 
 // ===== TOOLBAR =====
 function deleteSelected(){
-  if(!selected) return; snapshot();
-  connections=connections.filter(c=>c.fromId!==selected&&c.toId!==selected);
-  gates=gates.filter(g=>g.id!==selected); window._conns=connections;
-  selected=null; simulate();render();updateProps(); setStatus('Deleted');
+  if(!selectedIds.size) return; snapshot();
+  const ids=new Set(selectedIds), n=ids.size;
+  connections=connections.filter(c=>!ids.has(c.fromId)&&!ids.has(c.toId));
+  gates=gates.filter(g=>!ids.has(g.id)); window._conns=connections;
+  clearSelection(); simulate();render();updateProps();renderCircuitTruthTable();
+  setStatus(n===1?'Deleted':`Deleted ${n} gates`);
 }
 document.getElementById('btn-delete').addEventListener('click', deleteSelected);
 document.getElementById('btn-undo').addEventListener('click', undo);
 document.getElementById('btn-redo').addEventListener('click', redo);
 document.getElementById('btn-new').addEventListener('click', ()=>{
   if(gates.length&&!confirm('Start new circuit? Unsaved changes will be lost.')) return;
-  snapshot(); gates=[];connections=[];selected=null;nextId=1;window._conns=[];
+  snapshot(); gates=[];connections=[];clearSelection();nextId=1;window._conns=[];
   simulate();render();updateProps(); setStatus('New circuit');
 });
 
@@ -386,7 +477,7 @@ document.getElementById('file-input').addEventListener('change', e=>{
     try{
       const d=JSON.parse(ev.target.result);
       snapshot(); gates=d.gates||[]; connections=d.connections||[]; nextId=d.nextId||99;
-      window._conns=connections; selected=null; simulate();render();fitView();updateProps();
+      window._conns=connections; clearSelection(); simulate();render();fitView();updateProps();
       setStatus('Imported: '+f.name);
     }catch{alert('Invalid circuit file');}
   };
@@ -439,7 +530,7 @@ document.querySelectorAll('.tmpl-btn').forEach(btn=>{
     gates=t.gates.map(g=>({...g,clockVal:0,q:0,nq:1,prevClk:0}));
     connections=t.connections.map(c=>({...c}));
     nextId=gates.reduce((m,g)=>Math.max(m,g.id),0)+1;
-    window._conns=connections; selected=null;
+    window._conns=connections; clearSelection();
     simulate();render(); setTimeout(fitView,60); setStatus('Template: '+t.name);
   });
 });
@@ -479,7 +570,7 @@ function renderUserTemplates() {
     gates=t.gates.map(g=>({...g,clockVal:0,q:0,nq:1,prevClk:0}));
     connections=t.connections.map(c=>({...c}));
     nextId=gates.reduce((m,g)=>Math.max(m,g.id),0)+1;
-    window._conns=connections; selected=null;
+    window._conns=connections; clearSelection();
     simulate();render();setTimeout(fitView,60);updateProps();renderCircuitTruthTable();
     setStatus('Loaded template: '+t.name);
   }));
@@ -584,7 +675,7 @@ function renderCircuitsList() {
     if(gates.length&&!confirm(`Load "${c.name}"? Unsaved changes will be lost.`)) return;
     const d=JSON.parse(c.data);
     snapshot(); gates=d.gates; connections=d.connections; nextId=d.nextId;
-    window._conns=connections; selected=null;
+    window._conns=connections; clearSelection();
     simulate();render();setTimeout(fitView,60);updateProps();
     document.getElementById('modal-circuits').classList.remove('open');
     setStatus(`Loaded: "${c.name}"`);

@@ -408,7 +408,7 @@ window.CodePanel = (function () {
         var gs2=(typeof gates!=='undefined')?gates:[];
         var g2=gs2.find(function(x){return x.id===gid;});
         if(!g2) return;
-        window.selected=gid;
+        if(typeof window.selectGate==="function") window.selectGate(gid); else window.selected=gid;
         var mc=document.getElementById('main-canvas');
         if(mc&&typeof view!=='undefined'&&window.GATE_DEFS){
           var def=window.GATE_DEFS[g2.type];
